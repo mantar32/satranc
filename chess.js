@@ -53,6 +53,13 @@ class ChessGame {
             });
 
             this.socket.on('game_start', (data) => {
+                // Robustly set color based on socket ID matches
+                if (this.socket.id === data.white) {
+                    this.myColor = 'white';
+                } else if (this.socket.id === data.black) {
+                    this.myColor = 'black';
+                }
+
                 this.startGame('online');
                 document.getElementById('online-lobby').classList.add('hidden');
                 document.getElementById('modal').classList.add('hidden'); // Close any end game modal
