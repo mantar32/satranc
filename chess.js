@@ -301,11 +301,16 @@ class ChessGame {
         this.clearSelection();
         this.selectedSquare = { row, col };
         this.validMoves = this.getValidMoves(row, col);
-        const squares = document.querySelectorAll('.square');
-        squares[row * 8 + col].classList.add('selected');
+
+        // Find square by data attributes to support flipped board
+        const selectedEl = document.querySelector(`.square[data-row="${row}"][data-col="${col}"]`);
+        if (selectedEl) selectedEl.classList.add('selected');
+
         this.validMoves.forEach(move => {
-            const targetSquare = squares[move.row * 8 + move.col];
-            targetSquare.classList.add(this.board[move.row][move.col] ? 'capture-hint' : 'move-hint');
+            const targetSquare = document.querySelector(`.square[data-row="${move.row}"][data-col="${move.col}"]`);
+            if (targetSquare) {
+                targetSquare.classList.add(this.board[move.row][move.col] ? 'capture-hint' : 'move-hint');
+            }
         });
     }
 
