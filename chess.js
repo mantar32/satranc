@@ -34,7 +34,7 @@ class ChessGame {
         try {
             // If running on local, use local. If moved to Vercel, need to point to Render URL.
             // You can replace 'null' with your Render URL, e.g., 'https://your-app.onrender.com'
-            const productionUrl = null;
+            const productionUrl = 'https://satranc-server.onrender.com';
             const socketUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
                 ? window.location.origin
                 : (productionUrl || window.location.origin);
