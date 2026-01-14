@@ -50,14 +50,15 @@ io.on('connection', (socket) => {
             room.black = socket.id;
             socket.join(roomId);
 
+            // Tell the joiner they are black FIRST so they set color before game starts
+            socket.emit('player_joined', { color: 'black' });
+
             // Notify both players
             io.to(roomId).emit('game_start', {
                 white: room.white,
                 black: room.black
             });
 
-            // Tell the joiner they are black
-            socket.emit('player_joined', { color: 'black' });
             console.log(`User ${socket.id} joined room ${roomId}`);
         } else {
             socket.emit('error_message', 'Oda dolu veya bulunamadı!');
