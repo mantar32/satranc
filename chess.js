@@ -661,24 +661,7 @@ class ChessGame {
     }
 
     updateMoveHistoryDisplay() {
-        const container = document.getElementById('move-history-list');
-        if (this.moveHistory.length === 0) {
-            container.innerHTML = '<div class="no-moves">Henüz hamle yapılmadı</div>';
-            return;
-        }
-        let html = '';
-        for (let i = 0; i < this.moveHistory.length; i += 2) {
-            const moveNum = Math.floor(i / 2) + 1;
-            const whiteMove = this.getMoveNotation(this.moveHistory[i]);
-            const blackMove = this.moveHistory[i + 1] ? this.getMoveNotation(this.moveHistory[i + 1]) : '';
-            html += `<div class="move-item">
-                <span class="move-number">${moveNum}.</span>
-                <span class="white-move">${whiteMove}</span>
-                ${blackMove ? `<span class="black-move">${blackMove}</span>` : ''}
-            </div>`;
-        }
-        container.innerHTML = html;
-        container.scrollTop = container.scrollHeight;
+        // Move history display removed as per user request
     }
 
     renderFinalBoard() {
@@ -701,23 +684,7 @@ class ChessGame {
     }
 
     renderModalMoveHistory() {
-        const container = document.getElementById('modal-move-history');
-        if (this.moveHistory.length === 0) {
-            container.innerHTML = '<div class="no-moves">Hamle yapılmadı</div>';
-            return;
-        }
-        let html = '';
-        for (let i = 0; i < this.moveHistory.length; i += 2) {
-            const moveNum = Math.floor(i / 2) + 1;
-            const whiteMove = this.getMoveNotation(this.moveHistory[i]);
-            const blackMove = this.moveHistory[i + 1] ? this.getMoveNotation(this.moveHistory[i + 1]) : '';
-            html += `<div class="move-item">
-                <span class="move-number">${moveNum}.</span>
-                <span class="white-move">${whiteMove}</span>
-                ${blackMove ? `<span class="black-move">${blackMove}</span>` : ''}
-            </div>`;
-        }
-        container.innerHTML = html;
+        // Modal move history removed as per user request
     }
 
     newGame() {

@@ -687,83 +687,7 @@ body {
     box-shadow: none;
 }
 
-/* ========================================
-   Move History Panel
-   ======================================== */
-.move-history-panel {
-    background: linear-gradient(145deg, var(--bg-secondary), var(--bg-tertiary));
-    border-radius: 16px;
-    padding: 20px;
-    margin-top: 20px;
-    width: 100%;
-    max-width: 700px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.move-history-panel h3 {
-    color: var(--text-primary);
-    font-size: 1.1rem;
-    margin-bottom: 15px;
-    text-align: center;
-}
-
-.move-history-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    max-height: 120px;
-    overflow-y: auto;
-    padding: 10px;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
-}
-
-.move-history-list::-webkit-scrollbar {
-    width: 6px;
-}
-
-.move-history-list::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 3px;
-}
-
-.move-history-list::-webkit-scrollbar-thumb {
-    background: var(--accent-primary);
-    border-radius: 3px;
-}
-
-.move-item {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    padding: 6px 12px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-}
-
-.move-item .move-number {
-    color: var(--accent-gold);
-    font-weight: 600;
-    margin-right: 5px;
-}
-
-.move-item .white-move {
-    color: #fff;
-}
-
-.move-item .black-move {
-    color: #888;
-}
-
-.no-moves {
-    color: var(--text-muted);
-    font-style: italic;
-    width: 100%;
-    text-align: center;
-    padding: 10px;
-}
+/* Move History Removed */
 
 /* ========================================
    Modal Large (Game End Summary)
@@ -837,30 +761,7 @@ body {
     transform: none;
 }
 
-.modal-move-history {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    max-height: 150px;
-    overflow-y: auto;
-    padding: 10px;
-    background: rgba(0, 0, 0, 0.15);
-    border-radius: 8px;
-}
-
-.modal-move-history::-webkit-scrollbar {
-    width: 6px;
-}
-
-.modal-move-history::-webkit-scrollbar-thumb {
-    background: var(--accent-primary);
-    border-radius: 3px;
-}
-
-.modal-move-history .move-item {
-    padding: 5px 10px;
-    font-size: 0.85rem;
-}
+/* Modal Move History Removed */
 
 /* ========================================
    Animations
@@ -1060,6 +961,7 @@ body {
         justify-content: center;
     }
 }
+
 /* Lobby Styles */
 .lobby-controls {
     display: flex;
@@ -1149,26 +1051,29 @@ body {
         flex-direction: column;
         gap: 20px;
     }
-    
+
     .chess-board {
-        order: 1; /* Board in the middle/top */
+        order: 1;
+        /* Board in the middle/top */
     }
-    
+
     .player-panel {
         width: 100%;
         flex-direction: row;
         justify-content: space-between;
         padding: 15px 30px;
     }
-    
+
     .player-panel.black-panel {
-        order: 0; /* Top player (opponent) */
+        order: 0;
+        /* Top player (opponent) */
     }
-    
+
     .player-panel.white-panel {
-        order: 2; /* Bottom player (you) */
+        order: 2;
+        /* Bottom player (you) */
     }
-    
+
     .captured-pieces {
         margin-top: 0;
     }
@@ -1178,11 +1083,11 @@ body {
     .app-container {
         padding: 10px;
     }
-    
+
     .game-header h1 {
         font-size: 2rem;
     }
-    
+
     .menu-header h1 {
         font-size: 2.5rem;
     }
@@ -1196,34 +1101,37 @@ body {
 
     .chess-board {
         width: 95vw;
-        height: 95vw; /* Maintain square aspect ratio */
+        height: 95vw;
+        /* Maintain square aspect ratio */
         max-width: 500px;
         max-height: 500px;
         grid-template-columns: repeat(8, 1fr);
         grid-template-rows: repeat(8, 1fr);
     }
-    
+
     .square {
         width: 100%;
         height: 100%;
-        font-size: 8vw; /* Responsive pieces */
+        font-size: 8vw;
+        /* Responsive pieces */
         display: flex;
         align-items: center;
         justify-content: center;
     }
-    
+
     .piece {
-        font-size: 8vw; /* Adjust piece size relative to viewport width */
+        font-size: 8vw;
+        /* Adjust piece size relative to viewport width */
         line-height: 1;
     }
-    
+
     /* Adjust Controls */
     .game-controls {
         flex-wrap: wrap;
         justify-content: center;
         gap: 10px;
     }
-    
+
     .control-btn {
         padding: 8px 16px;
         font-size: 0.85rem;
@@ -1234,7 +1142,7 @@ body {
         padding: 25px 15px;
         width: 95%;
     }
-    
+
     .modal-buttons {
         flex-direction: column;
         gap: 10px;
@@ -1250,16 +1158,16 @@ body {
     .piece {
         font-size: 9vw;
     }
-    
+
     .player-panel {
         padding: 10px;
         min-width: auto;
     }
-    
+
     .player-avatar {
         font-size: 2rem;
     }
-    
+
     .player-name {
         font-size: 0.9rem;
     }
@@ -1268,4 +1176,3 @@ body {
         font-size: 1rem;
     }
 }
-
