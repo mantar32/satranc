@@ -1140,3 +1140,112 @@ body {
     animation: pulse 2s infinite;
 }
 
+
+/* ========================================
+   Mobile Responsiveness
+   ======================================== */
+@media screen and (max-width: 1024px) {
+    .game-container {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .chess-board {
+        order: 1; /* Board in the middle/top */
+    }
+    
+    .player-panel {
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
+        padding: 15px 30px;
+    }
+    
+    .player-panel.black-panel {
+        order: 0; /* Top player (opponent) */
+    }
+    
+    .player-panel.white-panel {
+        order: 2; /* Bottom player (you) */
+    }
+    
+    .captured-pieces {
+        margin-top: 0;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .app-container {
+        padding: 10px;
+    }
+    
+    .game-header h1 {
+        font-size: 2rem;
+    }
+    
+    .menu-header h1 {
+        font-size: 2.5rem;
+    }
+
+    /* Responsive Board */
+    .chess-board {
+        width: 95vw;
+        height: 95vw; /* Keep it square */
+        max-width: 500px;
+        max-height: 500px;
+    }
+    
+    .square {
+        width: auto;
+        height: auto;
+        font-size: 8vw; /* Responsive pieces */
+    }
+    
+    .piece {
+        font-size: 10vw; /* Make pieces slightly larger */
+    }
+    
+    /* Adjust Controls */
+    .game-controls {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .control-btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+
+    /* Modal Adjustments */
+    .modal-content {
+        padding: 30px 20px;
+        width: 90%;
+    }
+    
+    .modal-buttons {
+        flex-direction: column;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .square {
+        // font-size handled by vw above
+    }
+    
+    .piece {
+        font-size: 11vw;
+    }
+    
+    .player-panel {
+        padding: 10px 15px;
+    }
+    
+    .player-avatar {
+        font-size: 2.5rem;
+    }
+    
+    .player-name {
+        font-size: 1rem;
+    }
+}
+
