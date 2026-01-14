@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Modern ve şık tasarımlı web tabanlı satranç oyunu">
+    <title>Satranç Oyunu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Start Menu -->
+        <div class="start-menu" id="start-menu">
+            <div class="menu-content">
+                <div class="menu-header">
+                    <h1>♔ Satranç ♚</h1>
+                    <p class="menu-subtitle">Klasik strateji oyunu</p>
+                </div>
+
+                <div class="mode-selection">
+                    <h2>Oyun Modu Seçin</h2>
+
+                    <button class="mode-btn" id="two-player-btn">
+                        <div class="mode-icon">👥</div>
+                        <div class="mode-info">
+                            <span class="mode-title">2 Kişilik</span>
+                            <span class="mode-desc">Arkadaşınızla oynayın</span>
+                        </div>
+                    </button>
+
+                    <button class="mode-btn" id="vs-computer-btn">
+                        <div class="mode-icon">🤖</div>
+                        <div class="mode-info">
+                            <span class="mode-title">Bilgisayara Karşı</span>
+                            <span class="mode-desc">Yapay zeka ile mücadele</span>
+                        </div>
+                    </button>
+
+                    <button class="mode-btn" id="online-btn">
+                        <div class="mode-icon">🌐</div>
+                        <div class="mode-info">
+                            <span class="mode-title">Online</span>
+                            <span class="mode-desc">Uzaktaki arkadaşınla</span>
+                        </div>
+                    </button>
+                </div>
+
+                <div class="online-lobby hidden" id="online-lobby">
+                    <h2>Online Lobi</h2>
+                    <div class="lobby-controls">
+                        <button class="action-btn" id="create-room-btn">
+                            <span class="btn-icon">➕</span> Oda Oluştur
+                        </button>
+
+                        <div class="separator">YA DA</div>
+
+                        <div class="join-room-section">
+                            <input type="text" id="room-input" placeholder="Oda Kodu Girin" maxlength="6">
+                            <button class="action-btn" id="join-room-btn">Katıl</button>
+                        </div>
+
+                        <div class="room-status hidden" id="room-wait-status">
+                            <p>Oda Kodu: <strong id="display-room-id">---</strong></p>
+                            <p class="pulse-text">Rakip bekleniyor...</p>
+                        </div>
+                    </div>
+                    <button class="back-btn" id="back-to-modes-online">
+                        <span>← Geri</span>
+                    </button>
+                </div>
+
+                <div class="difficulty-selection hidden" id="difficulty-selection">
+                    <h2>Zorluk Seviyesi</h2>
+                    <div class="difficulty-buttons">
+                        <button class="difficulty-btn" data-level="1">
+                            <span class="diff-level">1</span>
+                            <span class="diff-name">Çok Kolay</span>
+                            <div class="diff-stars">⭐</div>
+                        </button>
+                        <button class="difficulty-btn" data-level="2">
+                            <span class="diff-level">2</span>
+                            <span class="diff-name">Kolay</span>
+                            <div class="diff-stars">⭐⭐</div>
+                        </button>
+                        <button class="difficulty-btn" data-level="3">
+                            <span class="diff-level">3</span>
+                            <span class="diff-name">Orta</span>
+                            <div class="diff-stars">⭐⭐⭐</div>
+                        </button>
+                        <button class="difficulty-btn" data-level="4">
+                            <span class="diff-level">4</span>
+                            <span class="diff-name">Zor</span>
+                            <div class="diff-stars">⭐⭐⭐⭐</div>
+                        </button>
+                        <button class="difficulty-btn" data-level="5">
+                            <span class="diff-level">5</span>
+                            <span class="diff-name">Çok Zor</span>
+                            <div class="diff-stars">⭐⭐⭐⭐⭐</div>
+                        </button>
+                    </div>
+                    <button class="back-btn" id="back-to-modes">
+                        <span>← Geri</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div class="game-screen hidden" id="game-screen">
+            <header class="game-header">
+                <h1>♔ Satranç Oyunu ♚</h1>
+                <p class="subtitle" id="game-mode-label">2 Kişilik Mod</p>
+            </header>
+
+            <main class="game-container">
+                <div class="player-panel white-panel">
+                    <div class="player-avatar">♔</div>
+                    <div class="player-info">
+                        <span class="player-name" id="white-name">Beyaz</span>
+                        <div class="captured-pieces" id="white-captured"></div>
+                    </div>
+                    <div class="turn-indicator" id="white-turn">Sıra Sizde</div>
+                </div>
+
+                <div class="board-wrapper">
+                    <div class="board-glow"></div>
+                    <div class="chess-board" id="chess-board"></div>
+
+                </div>
+
+                <div class="player-panel black-panel">
+                    <div class="player-avatar">♚</div>
+                    <div class="player-info">
+                        <span class="player-name" id="black-name">Siyah</span>
+                        <div class="captured-pieces" id="black-captured"></div>
+                    </div>
+                    <div class="turn-indicator hidden" id="black-turn">Sıra Sizde</div>
+                </div>
+            </main>
+
+            <div class="game-controls">
+                <button class="control-btn" id="main-menu">
+                    <span class="btn-icon">🏠</span>
+                    <span>Ana Menü</span>
+                </button>
+                <button class="control-btn" id="new-game">
+                    <span class="btn-icon">🔄</span>
+                    <span>Yeni Oyun</span>
+                </button>
+
+            </div>
+
+            <div class="game-status" id="game-status"></div>
+
+            <!-- Move History Panel -->
+            <div class="move-history-panel">
+                <h3>📜 Hamle Geçmişi</h3>
+                <div class="move-history-list" id="move-history-list">
+                    <div class="no-moves">Henüz hamle yapılmadı</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal for game end -->
+        <div class="modal-overlay hidden" id="modal">
+            <div class="modal-content modal-large">
+                <div class="modal-icon" id="modal-icon">👑</div>
+                <h2 id="modal-title">Oyun Bitti!</h2>
+                <p id="modal-message"></p>
+
+                <!-- Final Board State -->
+                <div class="final-game-section">
+                    <h3>📋 Son Oyun Durumu</h3>
+                    <div class="final-board-container">
+                        <div class="final-board" id="final-board"></div>
+                    </div>
+                </div>
+
+                <!-- Move History in Modal -->
+                <div class="final-game-section">
+                    <h3>📜 Tüm Hamleler</h3>
+                    <div class="modal-move-history" id="modal-move-history"></div>
+                </div>
+
+                <div class="modal-buttons">
+                    <button class="modal-btn" id="modal-new-game">Tekrar Oyna</button>
+                    <button class="modal-btn secondary" id="modal-main-menu">Ana Menü</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="chess.js"></script>
+</body>
+
+</html>
