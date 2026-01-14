@@ -1176,3 +1176,16 @@ body {
         font-size: 1rem;
     }
 }
+/* ========================================
+   Perspective Flipping (Black Player View)
+   ======================================== */
+@media screen and (max-width: 1024px) {
+    .game-container.perspective-black .player-panel.black-panel {
+        order: 2 !important; /* Move Black panel (You) to bottom */
+    }
+    
+    .game-container.perspective-black .player-panel.white-panel {
+        order: 0 !important; /* Move White panel (Opponent) to top */
+    }
+}
+

@@ -140,13 +140,22 @@ class ChessGame {
         if (mode === 'two-player') {
             document.getElementById('black-name').textContent = 'Rakip';
             this.myColor = null; // Local multiplayer
+            document.querySelector('.game-container').classList.remove('perspective-black');
         } else if (mode === 'vs-computer') {
             document.getElementById('black-name').textContent = 'Bilgisayar';
             this.myColor = 'white';
+            document.querySelector('.game-container').classList.remove('perspective-black');
         } else if (mode === 'online') {
             document.getElementById('game-mode-label').textContent = `Online Oda: ${this.roomId}`;
             document.getElementById('white-name').textContent = this.myColor === 'white' ? 'Siz' : 'Rakip';
             document.getElementById('black-name').textContent = this.myColor === 'black' ? 'Siz' : 'Rakip';
+
+            // Toggle perspective class for flipping panels via CSS
+            if (this.myColor === 'black') {
+                document.querySelector('.game-container').classList.add('perspective-black');
+            } else {
+                document.querySelector('.game-container').classList.remove('perspective-black');
+            }
         }
         this.createBoard();
         this.setupPieces();
@@ -176,30 +185,47 @@ class ChessGame {
     renderBoard() {
         const boardEl = document.getElementById('chess-board');
         boardEl.innerHTML = '';
-        for (let row = 0; row < 8; row++) {
-            for (let col = 0; col < 8; col++) {
-                const square = document.createElement('div');
-                square.className = `square ${(row + col) % 2 === 0 ? 'light' : 'dark'}`;
-                square.dataset.row = row;
-                square.dataset.col = col;
-                if (this.lastMove) {
-                    if ((this.lastMove.from.row === row && this.lastMove.from.col === col) ||
-                        (this.lastMove.to.row === row && this.lastMove.to.col === col)) {
-                        square.classList.add('last-move');
-                    }
+
+        const isBlack = this.gameMode === 'online' && this.myColor === 'black'; // Check if perspective should be flipped
+
+        if (isBlack) {
+            // Correct Flipped Loop:
+            for (let row = 7; row >= 0; row--) {
+                for (let col = 7; col >= 0; col--) {
+                    this.createSquare(boardEl, row, col);
                 }
-                const piece = this.board[row][col];
-                if (piece) {
-                    const pieceEl = document.createElement('span');
-                    pieceEl.className = `piece ${piece.color}`;
-                    pieceEl.textContent = this.pieces[piece.color][piece.type];
-                    square.appendChild(pieceEl);
-                    if (piece.type === 'king' && this.isKingInCheck(piece.color)) square.classList.add('check');
+            }
+        } else {
+            // Standard Loop: Row 0 (Top) -> 7 (Bottom), Col 0 (Left) -> 7 (Right)
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    this.createSquare(boardEl, row, col);
                 }
-                boardEl.appendChild(square);
             }
         }
         this.updateGameStatus();
+    }
+
+    createSquare(container, row, col) {
+        const square = document.createElement('div');
+        square.className = `square ${(row + col) % 2 === 0 ? 'light' : 'dark'}`;
+        square.dataset.row = row;
+        square.dataset.col = col;
+        if (this.lastMove) {
+            if ((this.lastMove.from.row === row && this.lastMove.from.col === col) ||
+                (this.lastMove.to.row === row && this.lastMove.to.col === col)) {
+                square.classList.add('last-move');
+            }
+        }
+        const piece = this.board[row][col];
+        if (piece) {
+            const pieceEl = document.createElement('span');
+            pieceEl.className = `piece ${piece.color}`;
+            pieceEl.textContent = this.pieces[piece.color][piece.type];
+            square.appendChild(pieceEl);
+            if (piece.type === 'king' && this.isKingInCheck(piece.color)) square.classList.add('check');
+        }
+        container.appendChild(square);
     }
 
     setupEventListeners() {
