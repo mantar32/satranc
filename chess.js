@@ -214,6 +214,10 @@ class ChessGame {
     }
 
     goToMainMenu() {
+        if (this.gameMode === 'online' && this.roomId) {
+            this.socket.emit('leave_room', this.roomId);
+            this.roomId = null;
+        }
         document.getElementById('game-screen').classList.add('hidden');
         document.getElementById('start-menu').classList.remove('hidden');
         this.showModeSelection();

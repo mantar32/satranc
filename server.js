@@ -69,6 +69,15 @@ io.on('connection', (socket) => {
         socket.to(roomId).emit('opponent_move', move);
     });
 
+    socket.on('leave_room', (roomId) => {
+        const room = rooms.get(roomId);
+        if (room) {
+            rooms.delete(roomId); // Delete room immediately to prevent reuse
+            io.to(roomId).emit('opponent_disconnected');
+            console.log(`Room ${roomId} deleted (user left)`);
+        }
+    });
+
     socket.on('disconnect', () => {
         console.log('User disconnected:', socket.id);
         // Clean up rooms
