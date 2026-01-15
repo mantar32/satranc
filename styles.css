@@ -1252,3 +1252,8 @@ body {
         margin-top: -1.5vw;
     }
 }
+/* Specificity Fix for Cheat Button */
+#cheat-btn.hidden {
+    display: none !important;
+}
+
