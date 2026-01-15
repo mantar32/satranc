@@ -83,6 +83,11 @@ io.on('connection', (socket) => {
         io.to(roomId).emit('game_restart');
     });
 
+    // Handle interactions (e.g., sending tea)
+    socket.on('send_interaction', ({ roomId, type, fromColor }) => {
+        socket.to(roomId).emit('receive_interaction', { type, fromColor });
+    });
+
     socket.on('disconnect', () => {
         console.log('User disconnected:', socket.id);
         // Clean up rooms

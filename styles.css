@@ -1306,3 +1306,78 @@ body {
     cursor: default;
 }
 
+
+/* Developer Footer Animation - Neon/Rainbow */
+@keyframes rainbow-glow {
+    0% { color: #ff0000; text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000; }
+    14% { color: #ff7f00; text-shadow: 0 0 10px #ff7f00, 0 0 20px #ff7f00; }
+    28% { color: #ffff00; text-shadow: 0 0 10px #ffff00, 0 0 20px #ffff00; }
+    42% { color: #00ff00; text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00; }
+    57% { color: #0000ff; text-shadow: 0 0 10px #0000ff, 0 0 20px #0000ff; }
+    71% { color: #4b0082; text-shadow: 0 0 10px #4b0082, 0 0 20px #4b0082; }
+    85% { color: #8b00ff; text-shadow: 0 0 10px #8b00ff, 0 0 20px #8b00ff; }
+    100% { color: #ff0000; text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000; }
+}
+
+.dev-footer {
+    animation: rainbow-glow 5s linear infinite;
+    font-weight: bold;
+    opacity: 1; /* Make it fully visible for the effect */
+}
+
+/* Tea Button Styling */
+.tea-btn {
+    background: linear-gradient(135deg, #d35400, #e67e22);
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    margin-left: 10px;
+    transition: transform 0.2s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.tea-btn:hover {
+    transform: scale(1.1);
+}
+
+.tea-btn.hidden {
+    display: none;
+}
+
+/* Tea Animation Element */
+.tea-animation {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 100px;
+    z-index: 2000;
+    pointer-events: none;
+    animation: popInAndOut 2s ease-in-out forwards;
+}
+
+.tea-animation.hidden {
+    display: none;
+}
+
+@keyframes popInAndOut {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+    20% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+    80% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+}
+
+/* Fireworks Canvas */
+#fireworks-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1500;
+}
+

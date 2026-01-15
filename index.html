@@ -122,6 +122,8 @@
                         <div class="captured-pieces" id="white-captured"></div>
                     </div>
                     <div class="turn-indicator" id="white-turn">Sıra Sizde</div>
+                    <button class="tea-btn hidden" id="tea-btn-white" onclick="game.sendTea('white')">☕ Çay İkram
+                        Et</button>
                 </div>
 
                 <div class="board-wrapper">
@@ -137,6 +139,8 @@
                         <div class="captured-pieces" id="black-captured"></div>
                     </div>
                     <div class="turn-indicator hidden" id="black-turn">Sıra Sizde</div>
+                    <button class="tea-btn hidden" id="tea-btn-black" onclick="game.sendTea('black')">☕ Çay İkram
+                        Et</button>
                 </div>
             </main>
 
@@ -186,6 +190,10 @@
     </footer>
     </div>
 
+    <div id="tea-animation" class="tea-animation hidden">☕</div>
+    <canvas id="fireworks-canvas"></canvas>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
     <script src="pieces.js"></script>
     <script src="chess.js"></script>

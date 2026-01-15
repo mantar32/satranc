@@ -75,6 +75,17 @@ class ChessGame {
                 this.makeMove(move.from.row, move.from.col, move.to.row, move.to.col, true);
             });
 
+            this.socket.on('receive_interaction', ({ type, fromColor }) => {
+                if (type === 'tea') {
+                    this.showTeaAnimation();
+                }
+            });
+
+            this.socket.on('player_left', () => {
+                alert('Rakip oyundan ayrıldı.');
+                this.goToMainMenu();
+            });
+
             this.socket.on('opponent_disconnected', () => {
                 alert('Rakip oyundan ayrıldı!');
                 this.goToMainMenu();
@@ -168,6 +179,9 @@ class ChessGame {
             document.getElementById('black-name').textContent = this.myColor === 'black' ? 'Siz' : 'Rakip';
 
             // Toggle perspective class for flipping panels via CSS
+            document.getElementById('game-mode-label').textContent = 'Online Çok Oyunculu';
+            document.querySelectorAll('.tea-btn').forEach(btn => btn.classList.remove('hidden'));
+
             if (this.myColor === 'black') {
                 document.querySelector('.game-container').classList.add('perspective-black');
             } else {
@@ -181,6 +195,8 @@ class ChessGame {
                 document.getElementById('cheat-btn').classList.add('hidden');
             }
         } else {
+            // Hide online-only buttons
+            document.querySelectorAll('.tea-btn').forEach(btn => btn.classList.add('hidden'));
             document.getElementById('cheat-btn').classList.add('hidden');
         }
         this.createBoard();
@@ -707,6 +723,52 @@ class ChessGame {
         });
     }
 
+    // --- Interaction & Effects ---
+
+    sendTea(color) {
+        if (this.gameMode !== 'online' || !this.roomId) return;
+        // Only allow sending to opponent
+        if (color === this.myColor) return;
+
+        this.socket.emit('send_interaction', {
+            roomId: this.roomId,
+            type: 'tea',
+            fromColor: this.myColor
+        });
+        // Show local feedback (optional, maybe a toast)
+    }
+
+    showTeaAnimation() {
+        const teaEl = document.getElementById('tea-animation');
+        teaEl.classList.remove('hidden');
+        // Animation is handled by CSS keyframes 'popInAndOut'
+        // Reset after animation
+        setTimeout(() => {
+            teaEl.classList.add('hidden');
+        }, 2000);
+    }
+
+    triggerFireworks() {
+        const duration = 3 * 1000;
+        const animationEnd = Date.now() + duration;
+        const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 1500 };
+
+        const randomInRange = (min, max) => Math.random() * (max - min) + min;
+
+        const interval = setInterval(() => {
+            const timeLeft = animationEnd - Date.now();
+
+            if (timeLeft <= 0) {
+                return clearInterval(interval);
+            }
+
+            const particleCount = 50 * (timeLeft / duration);
+            // since particles fall down, start a bit higher than random
+            confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+            confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+        }, 250);
+    }
+
     updateTurnIndicators() {
         document.getElementById('white-turn').classList.toggle('hidden', this.currentPlayer !== 'white');
         document.getElementById('black-turn').classList.toggle('hidden', this.currentPlayer !== 'black');
@@ -721,102 +783,96 @@ class ChessGame {
     }
 
     checkGameEnd() {
-        let hasValidMoves = false;
-        for (let r = 0; r < 8 && !hasValidMoves; r++) {
-            for (let c = 0; c < 8 && !hasValidMoves; c++) {
-                const piece = this.board[r][c];
-                if (piece && piece.color === this.currentPlayer && this.getValidMoves(r, c).length > 0) hasValidMoves = true;
-            }
-        }
-        if (!hasValidMoves) {
-            this.isGameOver = true;
-            const modal = document.getElementById('modal');
-            const inCheck = this.isKingInCheck(this.currentPlayer);
-
-            if (inCheck) {
-                let winner;
-                if (this.gameMode === 'two-player') winner = this.currentPlayer === 'white' ? 'Siyah' : 'Beyaz';
-                else if (this.gameMode === 'vs-computer') winner = this.currentPlayer === 'white' ? 'Bilgisayar' : 'Siz';
-                else if (this.gameMode === 'online') winner = this.currentPlayer === this.myColor ? 'Rakip' : 'Siz';
-
-                document.getElementById('modal-icon').textContent = (this.gameMode === 'online' && winner === 'Rakip') ? '😔' : '🎉';
-                document.getElementById('modal-title').textContent = 'Şah Mat!';
-                document.getElementById('modal-message').textContent = `${winner} kazandı!`;
-            } else {
-                document.getElementById('modal-icon').textContent = '🤝';
-                document.getElementById('modal-title').textContent = 'Pat!';
-                document.getElementById('modal-message').textContent = 'Oyun berabere bitti.';
-            }
-            this.renderFinalBoard();
-            this.renderModalMoveHistory();
-            modal.classList.remove('hidden');
-        }
     }
+    if(!hasValidMoves) {
+        this.isGameOver = true;
+        const modal = document.getElementById('modal');
+        const inCheck = this.isKingInCheck(this.currentPlayer);
 
-    getMoveNotation(move) {
-        const cols = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-        const rows = ['8', '7', '6', '5', '4', '3', '2', '1'];
-        const pieceSymbols = { king: 'K', queen: 'Q', rook: 'R', bishop: 'B', knight: 'N', pawn: '' };
-        const from = cols[move.from.col] + rows[move.from.row];
-        const to = cols[move.to.col] + rows[move.to.row];
-        const pieceSymbol = pieceSymbols[move.piece.type];
-        const capture = move.captured ? 'x' : '';
-        if (move.moveData && move.moveData.castling) {
-            return move.moveData.castling === 'kingSide' ? 'O-O' : 'O-O-O';
-        }
-        return pieceSymbol + (capture && !pieceSymbol ? from[0] : '') + capture + to;
-    }
+        if (inCheck) {
+            let winner;
+            if (this.gameMode === 'two-player') winner = this.currentPlayer === 'white' ? 'Siyah' : 'Beyaz';
+            else if (this.gameMode === 'vs-computer') winner = this.currentPlayer === 'white' ? 'Bilgisayar' : 'Siz';
+            else if (this.gameMode === 'online') winner = this.currentPlayer === this.myColor ? 'Rakip' : 'Siz';
 
-    updateMoveHistoryDisplay() {
-        // Move history display removed as per user request
-    }
-
-    renderFinalBoard() {
-        const finalBoard = document.getElementById('final-board');
-        finalBoard.innerHTML = '';
-        for (let row = 0; row < 8; row++) {
-            for (let col = 0; col < 8; col++) {
-                const square = document.createElement('div');
-                square.className = `square ${(row + col) % 2 === 0 ? 'light' : 'dark'}`;
-                const piece = this.board[row][col];
-                if (piece) {
-                    const pieceEl = document.createElement('img');
-                    pieceEl.className = `piece ${piece.color}`;
-                    pieceEl.src = this.getPieceSVG(piece.color, piece.type);
-                    square.appendChild(pieceEl);
-                }
-                finalBoard.appendChild(square);
-            }
-        }
-    }
-
-    renderModalMoveHistory() {
-        // Modal move history removed as per user request
-    }
-
-    newGame(isRemote = false) {
-        if (this.gameMode === 'online' && !isRemote) {
-            this.socket.emit('request_restart', this.roomId);
-            return;
-        }
-
-        this.resetGameState();
-        this.createBoard();
-        this.setupPieces();
-        this.renderBoard();
-        this.updateCapturedPieces();
-        this.updateTurnIndicators();
-        this.updateMoveHistoryDisplay(); // Function is empty but harmless
-        document.getElementById('game-status').textContent = '';
-        document.getElementById('game-status').className = 'game-status';
-
-        // Re-evaluate cheat button visibility on restart
-        if (this.gameMode === 'online' && this.myColor === 'white') {
-            document.getElementById('cheat-btn').classList.remove('hidden');
+            document.getElementById('modal-icon').textContent = (this.gameMode === 'online' && winner === 'Rakip') ? '😔' : '🎉';
+            document.getElementById('modal-title').textContent = 'Şah Mat!';
+            document.getElementById('modal-message').textContent = `${winner} kazandı!`;
         } else {
-            document.getElementById('cheat-btn').classList.add('hidden');
+            document.getElementById('modal-icon').textContent = '🤝';
+            document.getElementById('modal-title').textContent = 'Pat!';
+            document.getElementById('modal-message').textContent = 'Oyun berabere bitti.';
+        }
+        this.renderFinalBoard();
+        this.renderModalMoveHistory();
+        modal.classList.remove('hidden');
+    }
+}
+
+getMoveNotation(move) {
+    const cols = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+    const rows = ['8', '7', '6', '5', '4', '3', '2', '1'];
+    const pieceSymbols = { king: 'K', queen: 'Q', rook: 'R', bishop: 'B', knight: 'N', pawn: '' };
+    const from = cols[move.from.col] + rows[move.from.row];
+    const to = cols[move.to.col] + rows[move.to.row];
+    const pieceSymbol = pieceSymbols[move.piece.type];
+    const capture = move.captured ? 'x' : '';
+    if (move.moveData && move.moveData.castling) {
+        return move.moveData.castling === 'kingSide' ? 'O-O' : 'O-O-O';
+    }
+    return pieceSymbol + (capture && !pieceSymbol ? from[0] : '') + capture + to;
+}
+
+updateMoveHistoryDisplay() {
+    // Move history display removed as per user request
+}
+
+renderFinalBoard() {
+    const finalBoard = document.getElementById('final-board');
+    finalBoard.innerHTML = '';
+    for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+            const square = document.createElement('div');
+            square.className = `square ${(row + col) % 2 === 0 ? 'light' : 'dark'}`;
+            const piece = this.board[row][col];
+            if (piece) {
+                const pieceEl = document.createElement('img');
+                pieceEl.className = `piece ${piece.color}`;
+                pieceEl.src = this.getPieceSVG(piece.color, piece.type);
+                square.appendChild(pieceEl);
+            }
+            finalBoard.appendChild(square);
         }
     }
+}
+
+renderModalMoveHistory() {
+    // Modal move history removed as per user request
+}
+
+newGame(isRemote = false) {
+    if (this.gameMode === 'online' && !isRemote) {
+        this.socket.emit('request_restart', this.roomId);
+        return;
+    }
+
+    this.resetGameState();
+    this.createBoard();
+    this.setupPieces();
+    this.renderBoard();
+    this.updateCapturedPieces();
+    this.updateTurnIndicators();
+    this.updateMoveHistoryDisplay(); // Function is empty but harmless
+    document.getElementById('game-status').textContent = '';
+    document.getElementById('game-status').className = 'game-status';
+
+    // Re-evaluate cheat button visibility on restart
+    if (this.gameMode === 'online' && this.myColor === 'white') {
+        document.getElementById('cheat-btn').classList.remove('hidden');
+    } else {
+        document.getElementById('cheat-btn').classList.add('hidden');
+    }
+}
 }
 
 document.addEventListener('DOMContentLoaded', () => new ChessGame());
