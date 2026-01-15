@@ -1381,3 +1381,27 @@ body {
     z-index: 1500;
 }
 
+
+/* Make Modal Transparent for Fireworks Visibility */
+.modal {
+    background: rgba(0, 0, 0, 0.6); /* Slightly more transparent */
+    backdrop-filter: blur(4px);
+}
+.modal-content {
+    background: rgba(26, 26, 46, 0.95); /* Keep content readable */
+    border: 1px solid rgba(233, 69, 96, 0.5);
+    box-shadow: 0 0 30px rgba(233, 69, 96, 0.2);
+}
+
+/* Enhanced Tea Animation - Slide Up */
+@keyframes teaSlideUp {
+    0% { transform: translate(-50%, 100vh) scale(0.5); opacity: 0; }
+    40% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+    60% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    100% { transform: translate(-50%, -100vh) scale(0.5); opacity: 0; }
+}
+
+.tea-animation.active {
+    animation: teaSlideUp 2.5s ease-in-out forwards;
+}
+

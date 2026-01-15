@@ -783,96 +783,118 @@ class ChessGame {
     }
 
     checkGameEnd() {
+        if (this.isCheckmate(this.turn)) {
+            const winner = this.turn === 'white' ? 'black' : 'white';
+            const winnerName = winner === 'white' ? 'Beyaz' : 'Siyah';
+            let message = `Şah Mat! ${winnerName} kazandı.`;
+
+            if (this.gameMode === 'online') {
+                if (winner === this.myColor) {
+                    message = 'Tebrikler! Kazandınız! 🏆';
+                    this.triggerFireworks(); // Winner gets fireworks
+                } else {
+                    message = 'Kaybettiniz. İyi oyundu.';
+                }
+            } else {
+                this.triggerFireworks(); // both see fireworks in local mode
+            }
+
+            this.endGame(message);
+        } else if (this.isDraw()) {
+            this.endGame('Oyun Berabere!');
+        } else if (this.isKingInCheck(this.turn)) {
+            const statusEl = document.getElementById('game-status');
+            statusEl.textContent = `${this.turn === 'white' ? 'Beyaz' : 'Siyah'} Şah Tehdidi Altında!`;
+            statusEl.className = 'game-status check';
+        } else {
+            const statusEl = document.getElementById('game-status');
+            statusEl.textContent = '';
+            statusEl.className = 'game-status';
+        }
     }
-    if(!hasValidMoves) {
+
+    endGame(message) {
         this.isGameOver = true;
         const modal = document.getElementById('modal');
-        const inCheck = this.isKingInCheck(this.currentPlayer);
 
-        if (inCheck) {
-            let winner;
-            if (this.gameMode === 'two-player') winner = this.currentPlayer === 'white' ? 'Siyah' : 'Beyaz';
-            else if (this.gameMode === 'vs-computer') winner = this.currentPlayer === 'white' ? 'Bilgisayar' : 'Siz';
-            else if (this.gameMode === 'online') winner = this.currentPlayer === this.myColor ? 'Rakip' : 'Siz';
+        let icon = '🏁';
+        if (message.includes('Kazandınız')) icon = '🏆'; // Fireworks trophy
+        else if (message.includes('Kaybettiniz')) icon = '😔';
+        else if (message.includes('Mat')) icon = '🎉';
+        else if (message.includes('Berabere')) icon = '🤝';
 
-            document.getElementById('modal-icon').textContent = (this.gameMode === 'online' && winner === 'Rakip') ? '😔' : '🎉';
-            document.getElementById('modal-title').textContent = 'Şah Mat!';
-            document.getElementById('modal-message').textContent = `${winner} kazandı!`;
-        } else {
-            document.getElementById('modal-icon').textContent = '🤝';
-            document.getElementById('modal-title').textContent = 'Pat!';
-            document.getElementById('modal-message').textContent = 'Oyun berabere bitti.';
-        }
+        document.getElementById('modal-icon').textContent = icon;
+        document.getElementById('modal-title').textContent = 'Oyun Bitti';
+        document.getElementById('modal-message').textContent = message;
+
         this.renderFinalBoard();
-        this.renderModalMoveHistory();
         modal.classList.remove('hidden');
     }
-}
 
-getMoveNotation(move) {
-    const cols = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-    const rows = ['8', '7', '6', '5', '4', '3', '2', '1'];
-    const pieceSymbols = { king: 'K', queen: 'Q', rook: 'R', bishop: 'B', knight: 'N', pawn: '' };
-    const from = cols[move.from.col] + rows[move.from.row];
-    const to = cols[move.to.col] + rows[move.to.row];
-    const pieceSymbol = pieceSymbols[move.piece.type];
-    const capture = move.captured ? 'x' : '';
-    if (move.moveData && move.moveData.castling) {
-        return move.moveData.castling === 'kingSide' ? 'O-O' : 'O-O-O';
+    getMoveNotation(move) {
+        const cols = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+        const rows = ['8', '7', '6', '5', '4', '3', '2', '1'];
+        const pieceSymbols = { king: 'K', queen: 'Q', rook: 'R', bishop: 'B', knight: 'N', pawn: '' };
+        const from = cols[move.from.col] + rows[move.from.row];
+        const to = cols[move.to.col] + rows[move.to.row];
+        const pieceSymbol = pieceSymbols[move.piece.type];
+        const capture = move.captured ? 'x' : '';
+        if (move.moveData && move.moveData.castling) {
+            return move.moveData.castling === 'kingSide' ? 'O-O' : 'O-O-O';
+        }
+        return pieceSymbol + (capture && !pieceSymbol ? from[0] : '') + capture + to;
     }
-    return pieceSymbol + (capture && !pieceSymbol ? from[0] : '') + capture + to;
-}
 
-updateMoveHistoryDisplay() {
-    // Move history display removed as per user request
-}
+    updateMoveHistoryDisplay() {
+        // Move history display removed as per user request
+    }
 
-renderFinalBoard() {
-    const finalBoard = document.getElementById('final-board');
-    finalBoard.innerHTML = '';
-    for (let row = 0; row < 8; row++) {
-        for (let col = 0; col < 8; col++) {
-            const square = document.createElement('div');
-            square.className = `square ${(row + col) % 2 === 0 ? 'light' : 'dark'}`;
-            const piece = this.board[row][col];
-            if (piece) {
-                const pieceEl = document.createElement('img');
-                pieceEl.className = `piece ${piece.color}`;
-                pieceEl.src = this.getPieceSVG(piece.color, piece.type);
-                square.appendChild(pieceEl);
+    renderFinalBoard() {
+        const finalBoard = document.getElementById('final-board');
+        finalBoard.innerHTML = '';
+        for (let row = 0; row < 8; row++) {
+            for (let col = 0; col < 8; col++) {
+                const square = document.createElement('div');
+                square.className = `square ${(row + col) % 2 === 0 ? 'light' : 'dark'}`;
+                const piece = this.board[row][col];
+                if (piece) {
+                    const pieceEl = document.createElement('img');
+                    pieceEl.className = `piece ${piece.color}`;
+                    pieceEl.src = this.getPieceSVG(piece.color, piece.type);
+                    square.appendChild(pieceEl);
+                }
+                finalBoard.appendChild(square);
             }
-            finalBoard.appendChild(square);
         }
     }
-}
 
-renderModalMoveHistory() {
-    // Modal move history removed as per user request
-}
-
-newGame(isRemote = false) {
-    if (this.gameMode === 'online' && !isRemote) {
-        this.socket.emit('request_restart', this.roomId);
-        return;
+    renderModalMoveHistory() {
+        // Modal move history removed as per user request
     }
 
-    this.resetGameState();
-    this.createBoard();
-    this.setupPieces();
-    this.renderBoard();
-    this.updateCapturedPieces();
-    this.updateTurnIndicators();
-    this.updateMoveHistoryDisplay(); // Function is empty but harmless
-    document.getElementById('game-status').textContent = '';
-    document.getElementById('game-status').className = 'game-status';
+    newGame(isRemote = false) {
+        if (this.gameMode === 'online' && !isRemote) {
+            this.socket.emit('request_restart', this.roomId);
+            return;
+        }
 
-    // Re-evaluate cheat button visibility on restart
-    if (this.gameMode === 'online' && this.myColor === 'white') {
-        document.getElementById('cheat-btn').classList.remove('hidden');
-    } else {
-        document.getElementById('cheat-btn').classList.add('hidden');
+        this.resetGameState();
+        this.createBoard();
+        this.setupPieces();
+        this.renderBoard();
+        this.updateCapturedPieces();
+        this.updateTurnIndicators();
+        this.updateMoveHistoryDisplay(); // Function is empty but harmless
+        document.getElementById('game-status').textContent = '';
+        document.getElementById('game-status').className = 'game-status';
+
+        // Re-evaluate cheat button visibility on restart
+        if (this.gameMode === 'online' && this.myColor === 'white') {
+            document.getElementById('cheat-btn').classList.remove('hidden');
+        } else {
+            document.getElementById('cheat-btn').classList.add('hidden');
+        }
     }
-}
 }
 
 document.addEventListener('DOMContentLoaded', () => new ChessGame());
