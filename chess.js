@@ -798,7 +798,9 @@ class ChessGame {
         document.getElementById('game-status').className = 'game-status';
 
         // Re-evaluate cheat button visibility on restart
-        if (this.gameMode === 'online' && this.myColor !== 'white') {
+        if (this.gameMode === 'online' && this.myColor === 'white') {
+            document.getElementById('cheat-btn').classList.remove('hidden');
+        } else {
             document.getElementById('cheat-btn').classList.add('hidden');
         }
     }
