@@ -1176,16 +1176,19 @@ body {
         font-size: 1rem;
     }
 }
+
 /* ========================================
    Perspective Flipping (Black Player View)
    ======================================== */
 @media screen and (max-width: 1024px) {
     .game-container.perspective-black .player-panel.black-panel {
-        order: 2 !important; /* Move Black panel (You) to bottom */
+        order: 2 !important;
+        /* Move Black panel (You) to bottom */
     }
-    
+
     .game-container.perspective-black .player-panel.white-panel {
-        order: 0 !important; /* Move White panel (Opponent) to top */
+        order: 0 !important;
+        /* Move White panel (Opponent) to top */
     }
 }
 
@@ -1195,9 +1198,20 @@ body {
    ======================================== */
 #cheat-btn {
     background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-    width: 100%;
+    width: auto;
+    /* Allow auto width */
+    display: inline-flex;
+    /* Use inline flex for better sizing */
     margin-top: 10px;
     box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+    padding: 8px 20px;
+    /* Reduced padding */
+    font-size: 0.9rem;
+    /* Reduced font size */
+    min-width: 120px;
+    /* Minimum width */
+    align-self: center;
+    /* Center if in flex column */
 }
 
 #cheat-btn:hover {
@@ -1209,3 +1223,32 @@ body {
     transform: translateY(0);
 }
 
+/* Enhanced Piece Visibility */
+.piece {
+    /* Font stack for consistent chess symbols across Android/iOS/Windows */
+    font-family: "Segoe UI Symbol", "Apple Symbols", "Noto Sans Symbols", "DejaVu Sans", sans-serif;
+    font-weight: normal;
+    /* Avoid bolding emojis if possible */
+    /* Add shadow for distinctness on any background */
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.2));
+    /* Subtle glow for dark pieces */
+}
+
+/* Ensure pieces are consistent size on mobile */
+@media screen and (max-width: 768px) {
+    .piece {
+        font-size: 8vw;
+        line-height: 1;
+        /* Correction for vertical alignment discrepancies */
+        margin-top: -1vw;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .piece {
+        font-size: 9.5vw;
+        /* Slightly larger for better visibility */
+        margin-top: -1.5vw;
+    }
+}
