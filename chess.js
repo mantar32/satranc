@@ -65,6 +65,10 @@ class ChessGame {
                 document.getElementById('modal').classList.add('hidden'); // Close any end game modal
             });
 
+            this.socket.on('game_restart', () => {
+                this.newGame(true); // true = force local reset without emitting
+            });
+
             this.socket.on('player_joined', (data) => {
                 this.myColor = data.color;
             });
@@ -773,16 +777,26 @@ class ChessGame {
         // Modal move history removed as per user request
     }
 
-    newGame() {
+    newGame(isRemote = false) {
+        if (this.gameMode === 'online' && !isRemote) {
+            this.socket.emit('request_restart', this.roomId);
+            return;
+        }
+
         this.resetGameState();
         this.createBoard();
         this.setupPieces();
         this.renderBoard();
         this.updateCapturedPieces();
         this.updateTurnIndicators();
-        this.updateMoveHistoryDisplay();
+        this.updateMoveHistoryDisplay(); // Function is empty but harmless
         document.getElementById('game-status').textContent = '';
         document.getElementById('game-status').className = 'game-status';
+
+        // Re-evaluate cheat button visibility on restart
+        if (this.gameMode === 'online' && this.myColor !== 'white') {
+            document.getElementById('cheat-btn').classList.add('hidden');
+        }
     }
 }
 

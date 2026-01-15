@@ -79,6 +79,10 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('request_restart', (roomId) => {
+        io.to(roomId).emit('game_restart');
+    });
+
     socket.on('disconnect', () => {
         console.log('User disconnected:', socket.id);
         // Clean up rooms
