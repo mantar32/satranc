@@ -1257,3 +1257,29 @@ body {
     display: none !important;
 }
 
+
+/* SVG Piece Overrides - Forced */
+.piece {
+    font-family: inherit !important;
+    font-weight: normal !important;
+    text-shadow: none !important;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.4)) !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    margin-top: 0 !important;
+    font-size: 0 !important; /* Hide any fallback text */
+    line-height: normal !important;
+}
+
+.piece:hover {
+    transform: scale(1.15) !important;
+}
+
+@media screen and (max-width: 768px) {
+    .piece {
+        font-size: 0 !important;
+        margin-top: 0 !important;
+    }
+}
+
