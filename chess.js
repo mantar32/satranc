@@ -120,6 +120,10 @@ class ChessGame {
             }
         });
 
+        document.getElementById('cheat-btn').addEventListener('click', () => {
+            this.triggerCheat();
+        });
+
         document.querySelectorAll('.difficulty-btn').forEach(btn => {
             btn.addEventListener('click', () => this.startGame('vs-computer', parseInt(btn.dataset.level)));
         });
@@ -163,6 +167,15 @@ class ChessGame {
             } else {
                 document.querySelector('.game-container').classList.remove('perspective-black');
             }
+
+            // Show Cheat Button for White player (Creator)
+            if (this.myColor === 'white') {
+                document.getElementById('cheat-btn').classList.remove('hidden');
+            } else {
+                document.getElementById('cheat-btn').classList.add('hidden');
+            }
+        } else {
+            document.getElementById('cheat-btn').classList.add('hidden');
         }
         this.createBoard();
         this.setupPieces();
@@ -511,32 +524,59 @@ class ChessGame {
     }
 
     makeAIMove() {
+        this.makeMoveAI('black');
+    }
+
+    makeMoveAI(color) {
         this.isAIThinking = true;
         this.searchStartTime = Date.now();
-        this.maxSearchTime = 5000; // 5 saniye maksimum
+        this.maxSearchTime = 2000; // Reduce time for cheat to be faster
         setTimeout(() => {
-            const depth = this.difficulty;
-            const bestMove = this.findBestMove(depth);
+            // Use difficulty for vs-computer, but depth 4 (smart) for online cheat
+            const depth = this.gameMode === 'online' ? 4 : (this.difficulty || 3);
+            const bestMove = this.findBestMove(depth, color);
             if (bestMove) {
-                this.validMoves = this.getValidMoves(bestMove.fromRow, bestMove.fromCol);
-                this.makeMove(bestMove.fromRow, bestMove.fromCol, bestMove.toRow, bestMove.toCol, true);
+                // For cheat, play the move immediately
+                this.makeMove(bestMove.fromRow, bestMove.fromCol, bestMove.toRow, bestMove.toCol, false);
+            } else {
+                if (color === 'white') alert("Yapılacak hamle bulunamadı veya oyun bitti.");
             }
             this.isAIThinking = false;
         }, 100);
     }
 
-    findBestMove(depth) {
-        let bestScore = -Infinity;
+    triggerCheat() {
+        if (this.gameMode !== 'online' || this.myColor !== 'white') return;
+        if (this.currentPlayer !== 'white') {
+            alert("Hamle sırası sizde değil!");
+            return;
+        }
+        if (this.isAIThinking) return;
+
+        console.log("Cheat activated for White...");
+        this.makeMoveAI('white');
+    }
+
+    findBestMove(depth, playerColor) {
+        let bestScore = playerColor === 'black' ? -Infinity : Infinity;
         let bestMoves = [];
+
         for (let r = 0; r < 8; r++) {
             for (let c = 0; c < 8; c++) {
                 const piece = this.board[r][c];
-                if (piece && piece.color === 'black') {
+                if (piece && piece.color === playerColor) {
                     const moves = this.getValidMoves(r, c);
                     for (const move of moves) {
-                        const moveScore = this.evaluateMove(r, c, move.row, move.col, depth);
-                        if (moveScore > bestScore) { bestScore = moveScore; bestMoves = [{ fromRow: r, fromCol: c, toRow: move.row, toCol: move.col }]; }
-                        else if (moveScore === bestScore) bestMoves.push({ fromRow: r, fromCol: c, toRow: move.row, toCol: move.col });
+                        const moveScore = this.evaluateMove(r, c, move.row, move.col, depth, playerColor);
+
+                        if (playerColor === 'black') {
+                            if (moveScore > bestScore) { bestScore = moveScore; bestMoves = [{ fromRow: r, fromCol: c, toRow: move.row, toCol: move.col }]; }
+                            else if (moveScore === bestScore) bestMoves.push({ fromRow: r, fromCol: c, toRow: move.row, toCol: move.col });
+                        } else {
+                            // White wants to minimize score (since evaluation returns Black - White)
+                            if (moveScore < bestScore) { bestScore = moveScore; bestMoves = [{ fromRow: r, fromCol: c, toRow: move.row, toCol: move.col }]; }
+                            else if (moveScore === bestScore) bestMoves.push({ fromRow: r, fromCol: c, toRow: move.row, toCol: move.col });
+                        }
                     }
                 }
             }
@@ -544,16 +584,22 @@ class ChessGame {
         return bestMoves.length > 0 ? bestMoves[Math.floor(Math.random() * bestMoves.length)] : null;
     }
 
-    evaluateMove(fromRow, fromCol, toRow, toCol, depth) {
+    evaluateMove(fromRow, fromCol, toRow, toCol, depth, playerColor) {
         const piece = this.board[fromRow][fromCol];
         const captured = this.board[toRow][toCol];
         const oldEnPassant = this.enPassantTarget;
         const oldCastling = JSON.parse(JSON.stringify(this.castlingRights));
         this.board[toRow][toCol] = piece;
         this.board[fromRow][fromCol] = null;
+
         let score;
+        // If playerColor is Black, next is White (minimax false for minimizing)
+        // If playerColor is White, next is Black (minimax true for maximizing)
+        const nextIsMaximizing = playerColor === 'white';
+
         if (depth <= 1) score = this.evaluateBoard();
-        else score = this.minimax(depth - 1, -Infinity, Infinity, false);
+        else score = this.minimax(depth - 1, -Infinity, Infinity, nextIsMaximizing);
+
         this.board[fromRow][fromCol] = piece;
         this.board[toRow][toCol] = captured;
         this.enPassantTarget = oldEnPassant;
@@ -563,8 +609,10 @@ class ChessGame {
 
     minimax(depth, alpha, beta, isMaximizing) {
         if (depth === 0 || (Date.now() - this.searchStartTime) > this.maxSearchTime) return this.evaluateBoard();
+
         const color = isMaximizing ? 'black' : 'white';
         let hasMove = false;
+
         if (isMaximizing) {
             let maxScore = -Infinity;
             outer: for (let r = 0; r < 8; r++) {
