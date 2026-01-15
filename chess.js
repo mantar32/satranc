@@ -102,7 +102,7 @@ class ChessGame {
         document.getElementById('two-player-btn').addEventListener('click', () => this.startGame('two-player'));
         document.getElementById('vs-computer-btn').addEventListener('click', () => this.showDifficultySelection());
         document.getElementById('back-to-modes').addEventListener('click', () => this.showModeSelection());
-        document.getElementById('back-to-modes-online').addEventListener('click', () => this.showModeSelection());
+
 
         document.getElementById('online-btn').addEventListener('click', () => {
             document.querySelector('.mode-selection').classList.add('hidden');
