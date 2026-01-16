@@ -31,16 +31,18 @@ function generateRoomId() {
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
 
-    socket.on('create_room', () => {
+    socket.on('create_room', (data) => {
         const roomId = generateRoomId();
+        // Store room with time limit (default 120s if not provided)
         rooms.set(roomId, {
             players: [socket.id],
             white: socket.id,
-            black: null
+            black: null,
+            timeLimit: (data && data.timeLimit) ? data.timeLimit : 120
         });
         socket.join(roomId);
         socket.emit('room_created', { roomId, color: 'white' });
-        console.log(`Room created: ${roomId} by ${socket.id}`);
+        console.log(`Room created: ${roomId} by ${socket.id} with timeLimit: ${rooms.get(roomId).timeLimit}`);
     });
 
     socket.on('join_room', (roomId) => {
@@ -56,7 +58,8 @@ io.on('connection', (socket) => {
             // Notify both players
             io.to(roomId).emit('game_start', {
                 white: room.white,
-                black: room.black
+                black: room.black,
+                timeLimit: room.timeLimit
             });
 
             console.log(`User ${socket.id} joined room ${roomId}`);

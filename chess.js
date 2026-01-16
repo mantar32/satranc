@@ -20,12 +20,29 @@ class ChessGame {
         this.socket = null;
         // SVG pieces now handled by getPieceSVG() method
         this.pieceValues = { pawn: 100, knight: 320, bishop: 330, rook: 500, queen: 900, king: 20000 };
+        this.selectedTime = 120; // Default 2 minutes
         this.init();
     }
 
     init() {
         this.setupMenuListeners();
+        this.setupTimeSelectionListeners();
         this.setupSocket();
+    }
+
+    setupTimeSelectionListeners() {
+        const timeBtns = document.querySelectorAll('.time-btn');
+        timeBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                // Update UI
+                timeBtns.forEach(b => b.classList.remove('selected'));
+                e.target.classList.add('selected');
+
+                // Update Value
+                const minutes = parseInt(e.target.dataset.time);
+                this.selectedTime = minutes * 60;
+            });
+        });
     }
 
     setupSocket() {
@@ -48,6 +65,7 @@ class ChessGame {
                 document.getElementById('room-wait-status').classList.remove('hidden');
                 document.getElementById('create-room-btn').classList.add('hidden');
                 document.querySelector('.join-room-section').classList.add('hidden');
+                document.querySelector('.time-selection').classList.add('hidden'); // Hide time selection
             });
 
             this.socket.on('game_start', (data) => {
@@ -56,6 +74,13 @@ class ChessGame {
                     this.myColor = 'white';
                 } else if (this.socket.id === data.black) {
                     this.myColor = 'black';
+                }
+
+                // Set Time Limit from Server
+                if (data.timeLimit) {
+                    this.timeRemaining = { white: data.timeLimit, black: data.timeLimit };
+                } else {
+                    this.timeRemaining = { white: 120, black: 120 }; // Fallback
                 }
 
                 this.startGame('online');
@@ -148,7 +173,7 @@ class ChessGame {
         });
 
         document.getElementById('create-room-btn').addEventListener('click', () => {
-            this.socket.emit('create_room');
+            this.socket.emit('create_room', { timeLimit: this.selectedTime });
         });
 
         document.getElementById('join-room-btn').addEventListener('click', () => {
@@ -234,10 +259,12 @@ class ChessGame {
                 document.getElementById('cheat-btn').classList.add('hidden');
             }
 
-            // Init Chess Clock (2 Minutes)
-            this.timeRemaining = { white: 120, black: 120 };
-            document.getElementById('white-timer').textContent = "02:00";
-            document.getElementById('black-timer').textContent = "02:00";
+            // Init Chess Clock (Value already set in game_start event for online)
+            // But we need to update the display text to match
+            const startMinutes = Math.floor(this.timeRemaining.white / 60).toString().padStart(2, '0');
+            document.getElementById('white-timer').textContent = `${startMinutes}:00`;
+            document.getElementById('black-timer').textContent = `${startMinutes}:00`;
+
             document.getElementById('white-timer').classList.remove('hidden');
             document.getElementById('black-timer').classList.remove('hidden');
 
