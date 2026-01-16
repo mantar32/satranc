@@ -113,6 +113,19 @@ class ChessGame {
         document.getElementById('vs-computer-btn').addEventListener('click', () => this.showDifficultySelection());
         document.getElementById('back-to-modes').addEventListener('click', () => this.showModeSelection());
 
+        // Listener for the new Online Lobby back button
+        const backToModesOnline = document.getElementById('back-to-modes-online');
+        if (backToModesOnline) {
+            backToModesOnline.addEventListener('click', () => {
+                // If in a room, leave it first
+                if (this.roomId) {
+                    this.socket.emit('leave_room', this.roomId);
+                    this.roomId = null;
+                }
+                this.showModeSelection();
+            });
+        }
+
 
         document.getElementById('online-btn').addEventListener('click', () => {
             document.querySelector('.mode-selection').classList.add('hidden');

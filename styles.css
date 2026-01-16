@@ -1656,3 +1656,15 @@ body {
     100% { transform: scale(1); opacity: 1; }
 }
 
+
+/* Ensure back button in online lobby looks good */
+#back-to-modes-online {
+    width: 100%;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+#back-to-modes-online:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
