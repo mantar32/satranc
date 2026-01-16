@@ -309,6 +309,7 @@ class ChessGame {
         this.enPassantTarget = null;
         this.castlingRights = { white: { kingSide: true, queenSide: true }, black: { kingSide: true, queenSide: true } };
         this.lastMove = null;
+        this.halfMoveClock = 0;
         this.isAIThinking = false;
     }
 
@@ -540,6 +541,14 @@ class ChessGame {
         this.enPassantTarget = (piece.type === 'pawn' && Math.abs(toRow - fromRow) === 2) ? { row: piece.color === 'white' ? toRow + 1 : toRow - 1, col: toCol } : null;
         if (piece.type === 'king') { this.castlingRights[piece.color].kingSide = false; this.castlingRights[piece.color].queenSide = false; }
         if (piece.type === 'rook') { if (fromCol === 0) this.castlingRights[piece.color].queenSide = false; if (fromCol === 7) this.castlingRights[piece.color].kingSide = false; }
+
+        // 50-Move Rule Logic: Reset on pawn move or capture, otherwise increment
+        if (piece.type === 'pawn' || captured) {
+            this.halfMoveClock = 0;
+        } else {
+            this.halfMoveClock++;
+        }
+
         this.lastMove = { from: { row: fromRow, col: fromCol }, to: { row: toRow, col: toCol } };
         this.currentPlayer = this.currentPlayer === 'white' ? 'black' : 'white';
         this.renderBoard();
@@ -820,8 +829,8 @@ class ChessGame {
             }
 
             this.endGame(message);
-        } else if (this.isDraw()) {
-            this.endGame('Oyun Berabere!');
+        } else if (this.isDraw() || this.halfMoveClock >= 100) {
+            this.endGame(this.halfMoveClock >= 100 ? 'Oyun Berabere! (50 Hamle Kuralı)' : 'Oyun Berabere!');
         } else if (this.isKingInCheck(this.currentPlayer)) {
             const statusEl = document.getElementById('game-status');
             statusEl.textContent = `${this.currentPlayer === 'white' ? 'Beyaz' : 'Siyah'} Şah Tehdidi Altında!`;
