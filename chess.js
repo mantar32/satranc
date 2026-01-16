@@ -574,16 +574,21 @@ class ChessGame {
         this.makeMoveAI('black');
     }
 
-    makeMoveAI(color) {
+    makeMoveAI(color, depthOverride = null, timeoutOverride = null) {
         this.isAIThinking = true;
         this.searchStartTime = Date.now();
-        this.maxSearchTime = 2000; // Reduce time for cheat to be faster
+        this.maxSearchTime = timeoutOverride || 2000;
+
         setTimeout(() => {
-            // Use difficulty for vs-computer, but depth 4 (smart) for online cheat
-            const depth = this.gameMode === 'online' ? 4 : (this.difficulty || 3);
+            // Normal depth 3, Cheat depth 5 (or override)
+            let depth = depthOverride || (this.gameMode === 'online' ? 4 : (this.difficulty || 3));
+
+            // If difficulty is 5 (Very Hard), increase depth
+            if (!depthOverride && this.difficulty === 5) depth = 4;
+
             const bestMove = this.findBestMove(depth, color);
+
             if (bestMove) {
-                // For cheat, play the move immediately
                 this.makeMove(bestMove.fromRow, bestMove.fromCol, bestMove.toRow, bestMove.toCol, false);
             } else {
                 if (color === 'white') alert("Yapılacak hamle bulunamadı veya oyun bitti.");
@@ -600,32 +605,42 @@ class ChessGame {
         }
         if (this.isAIThinking) return;
 
-        console.log("Cheat activated for White...");
-        this.makeMoveAI('white');
+        console.log("Cheat activated for White... Analyzing deeper...");
+        // Use Depth 5 and 5 seconds for Cheat Mode
+        this.makeMoveAI('white', 5, 5000);
     }
 
     findBestMove(depth, playerColor) {
         let bestScore = playerColor === 'black' ? -Infinity : Infinity;
         let bestMoves = [];
 
+        // Move Ordering: Collect all valid moves first
+        let allMoves = [];
         for (let r = 0; r < 8; r++) {
             for (let c = 0; c < 8; c++) {
                 const piece = this.board[r][c];
                 if (piece && piece.color === playerColor) {
                     const moves = this.getValidMoves(r, c);
                     for (const move of moves) {
-                        const moveScore = this.evaluateMove(r, c, move.row, move.col, depth, playerColor);
-
-                        if (playerColor === 'black') {
-                            if (moveScore > bestScore) { bestScore = moveScore; bestMoves = [{ fromRow: r, fromCol: c, toRow: move.row, toCol: move.col }]; }
-                            else if (moveScore === bestScore) bestMoves.push({ fromRow: r, fromCol: c, toRow: move.row, toCol: move.col });
-                        } else {
-                            // White wants to minimize score (since evaluation returns Black - White)
-                            if (moveScore < bestScore) { bestScore = moveScore; bestMoves = [{ fromRow: r, fromCol: c, toRow: move.row, toCol: move.col }]; }
-                            else if (moveScore === bestScore) bestMoves.push({ fromRow: r, fromCol: c, toRow: move.row, toCol: move.col });
-                        }
+                        allMoves.push({ fromRow: r, fromCol: c, toRow: move.row, toCol: move.col, captured: this.board[move.row][move.col] });
                     }
                 }
+            }
+        }
+
+        // Sort: Captures first to optimize pruning
+        allMoves.sort((a, b) => (b.captured ? 10 : 0) - (a.captured ? 10 : 0));
+
+        for (const move of allMoves) {
+            const moveScore = this.evaluateMove(move.fromRow, move.fromCol, move.toRow, move.toCol, depth, playerColor);
+
+            if (playerColor === 'black') {
+                if (moveScore > bestScore) { bestScore = moveScore; bestMoves = [move]; }
+                else if (moveScore === bestScore) bestMoves.push(move);
+            } else {
+                // White wants to minimize score (Returns Black - White)
+                if (moveScore < bestScore) { bestScore = moveScore; bestMoves = [move]; }
+                else if (moveScore === bestScore) bestMoves.push(move);
             }
         }
         return bestMoves.length > 0 ? bestMoves[Math.floor(Math.random() * bestMoves.length)] : null;
@@ -660,52 +675,59 @@ class ChessGame {
         const color = isMaximizing ? 'black' : 'white';
         let hasMove = false;
 
+        // Collect all moves
+        let allMoves = [];
+        for (let r = 0; r < 8; r++) {
+            for (let c = 0; c < 8; c++) {
+                const piece = this.board[r][c];
+                if (piece && piece.color === color) {
+                    const moves = this.getValidMoves(r, c);
+                    for (const move of moves) {
+                        allMoves.push({ r, c, move, captured: this.board[move.row][move.col] });
+                    }
+                }
+            }
+        }
+
+        // Sort: Captures first
+        allMoves.sort((a, b) => (b.captured ? 10 : 0) - (a.captured ? 10 : 0));
+
         if (isMaximizing) {
             let maxScore = -Infinity;
-            outer: for (let r = 0; r < 8; r++) {
-                for (let c = 0; c < 8; c++) {
-                    const piece = this.board[r][c];
-                    if (piece && piece.color === color) {
-                        const moves = this.getValidMoves(r, c);
-                        for (const move of moves) {
-                            hasMove = true;
-                            const captured = this.board[move.row][move.col];
-                            this.board[move.row][move.col] = piece;
-                            this.board[r][c] = null;
-                            const score = this.minimax(depth - 1, alpha, beta, false);
-                            this.board[r][c] = piece;
-                            this.board[move.row][move.col] = captured;
-                            maxScore = Math.max(maxScore, score);
-                            alpha = Math.max(alpha, score);
-                            if (beta <= alpha) break outer;
-                        }
-                    }
-                }
+            for (const m of allMoves) {
+                hasMove = true;
+                const captured = this.board[m.move.row][m.move.col];
+                this.board[m.move.row][m.move.col] = this.board[m.r][m.c];
+                this.board[m.r][m.c] = null;
+
+                const score = this.minimax(depth - 1, alpha, beta, false);
+
+                this.board[m.r][m.c] = this.board[m.move.row][m.move.col];
+                this.board[m.move.row][m.move.col] = captured;
+
+                maxScore = Math.max(maxScore, score);
+                alpha = Math.max(alpha, score);
+                if (beta <= alpha) break;
             }
-            return hasMove ? maxScore : (this.isKingInCheck(color) ? -100000 : 0);
+            return hasMove ? maxScore : (this.isKingInCheck(color) ? -100000 + (10 - depth) : 0);
         } else {
             let minScore = Infinity;
-            outer: for (let r = 0; r < 8; r++) {
-                for (let c = 0; c < 8; c++) {
-                    const piece = this.board[r][c];
-                    if (piece && piece.color === color) {
-                        const moves = this.getValidMoves(r, c);
-                        for (const move of moves) {
-                            hasMove = true;
-                            const captured = this.board[move.row][move.col];
-                            this.board[move.row][move.col] = piece;
-                            this.board[r][c] = null;
-                            const score = this.minimax(depth - 1, alpha, beta, true);
-                            this.board[r][c] = piece;
-                            this.board[move.row][move.col] = captured;
-                            minScore = Math.min(minScore, score);
-                            beta = Math.min(beta, score);
-                            if (beta <= alpha) break outer;
-                        }
-                    }
-                }
+            for (const m of allMoves) {
+                hasMove = true;
+                const captured = this.board[m.move.row][m.move.col];
+                this.board[m.move.row][m.move.col] = this.board[m.r][m.c];
+                this.board[m.r][m.c] = null;
+
+                const score = this.minimax(depth - 1, alpha, beta, true);
+
+                this.board[m.r][m.c] = this.board[m.move.row][m.move.col];
+                this.board[m.move.row][m.move.col] = captured;
+
+                minScore = Math.min(minScore, score);
+                beta = Math.min(beta, score);
+                if (beta <= alpha) break;
             }
-            return hasMove ? minScore : (this.isKingInCheck(color) ? 100000 : 0);
+            return hasMove ? minScore : (this.isKingInCheck(color) ? 100000 - (10 - depth) : 0);
         }
     }
 
