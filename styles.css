@@ -1463,3 +1463,18 @@ body {
     transform: translateY(1px);
 }
 
+
+/* Icon-only control buttons */
+.game-controls .control-btn {
+    min-width: 50px;
+    width: 60px;
+    height: 50px;
+    justify-content: center;
+    padding: 0;
+}
+
+.game-controls .control-btn .btn-icon {
+    margin-right: 0;
+    font-size: 1.5rem;
+}
+
