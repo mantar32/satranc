@@ -1646,25 +1646,34 @@ body {
         transform: translateY(0);
     }
 }
+
 /* Ensure tea icon also re-animates nicely */
 .tea-animation.active .tea-icon {
     animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 @keyframes popIn {
-    0% { transform: scale(0); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 
 /* Ensure back button in online lobby looks good */
 #back-to-modes-online {
-    width: 100%;
-    justify-content: center;
+    margin-top: 20px;
     background: rgba(255, 255, 255, 0.05);
+    /* Match other transparent buttons */
     border: 1px solid rgba(255, 255, 255, 0.1);
+    /* Removed width: 100% to match other back buttons */
 }
+
 #back-to-modes-online:hover {
     background: rgba(255, 255, 255, 0.1);
 }
-
