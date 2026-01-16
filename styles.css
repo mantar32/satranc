@@ -1511,3 +1511,9 @@ body {
 #main-menu:hover { background: rgba(71, 85, 105, 1); }
 #new-game:hover { background: rgba(37, 99, 235, 1); }
 
+
+/* Force hidden state to override flex display */
+.hidden {
+    display: none !important;
+}
+
