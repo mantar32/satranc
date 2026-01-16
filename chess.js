@@ -783,8 +783,8 @@ class ChessGame {
     }
 
     checkGameEnd() {
-        if (this.isCheckmate(this.turn)) {
-            const winner = this.turn === 'white' ? 'black' : 'white';
+        if (this.isCheckmate(this.currentPlayer)) {
+            const winner = this.currentPlayer === 'white' ? 'black' : 'white';
             const winnerName = winner === 'white' ? 'Beyaz' : 'Siyah';
             let message = `Şah Mat! ${winnerName} kazandı.`;
 
@@ -802,9 +802,9 @@ class ChessGame {
             this.endGame(message);
         } else if (this.isDraw()) {
             this.endGame('Oyun Berabere!');
-        } else if (this.isKingInCheck(this.turn)) {
+        } else if (this.isKingInCheck(this.currentPlayer)) {
             const statusEl = document.getElementById('game-status');
-            statusEl.textContent = `${this.turn === 'white' ? 'Beyaz' : 'Siyah'} Şah Tehdidi Altında!`;
+            statusEl.textContent = `${this.currentPlayer === 'white' ? 'Beyaz' : 'Siyah'} Şah Tehdidi Altında!`;
             statusEl.className = 'game-status check';
         } else {
             const statusEl = document.getElementById('game-status');
