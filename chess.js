@@ -221,12 +221,62 @@ class ChessGame {
             } else {
                 document.getElementById('cheat-btn').classList.add('hidden');
             }
+
+            // Init Chess Clock
+            this.timeRemaining = { white: 60, black: 60 };
+            document.getElementById('white-timer').textContent = "01:00";
+            document.getElementById('black-timer').textContent = "01:00";
+            document.getElementById('white-timer').classList.remove('hidden');
+            document.getElementById('black-timer').classList.remove('hidden');
+
+            // Start clock for White immediately
+            this.startClock('white');
+        } else {
+            // Hide online-only buttons
+            // document.getElementById('tea-btn').classList.add('hidden'); // Already hidden by default
+            // document.getElementById('cheat-btn').classList.add('hidden'); // Already hidden by default
         }
         this.createBoard();
         this.setupPieces();
         this.renderBoard();
         this.setupEventListeners();
         this.updateTurnIndicators();
+    }
+
+    startClock(color) {
+        if (this.gameMode !== 'online') return;
+        this.stopClock(); // Ensure no other clock is running
+
+        this.clockInterval = setInterval(() => {
+            this.timeRemaining[color]--;
+            this.updateClockDisplay(color);
+
+            if (this.timeRemaining[color] <= 0) {
+                this.stopClock();
+                const winner = color === 'white' ? 'black' : 'white';
+                this.endGame(`Süre Bitti! ${winner === 'white' ? 'Beyaz' : 'Siyah'} kazandı.`);
+            }
+        }, 1000);
+    }
+
+    stopClock() {
+        if (this.clockInterval) {
+            clearInterval(this.clockInterval);
+            this.clockInterval = null;
+        }
+    }
+
+    updateClockDisplay(color) {
+        const minutes = Math.floor(this.timeRemaining[color] / 60).toString().padStart(2, '0');
+        const seconds = (this.timeRemaining[color] % 60).toString().padStart(2, '0');
+        const timerElement = document.getElementById(`${color}-timer`);
+        timerElement.textContent = `${minutes}:${seconds}`;
+
+        if (this.timeRemaining[color] <= 10) {
+            timerElement.classList.add('low-time');
+        } else {
+            timerElement.classList.remove('low-time');
+        }
     }
 
     createBoard() {
@@ -319,6 +369,13 @@ class ChessGame {
         document.getElementById('start-menu').classList.remove('hidden');
         this.showModeSelection();
         this.resetGameState();
+    }
+
+    endGame(message) {
+        this.stopClock(); // Stop any running timer
+        document.getElementById('game-end-message').textContent = message;
+        document.getElementById('game-end-modal').classList.remove('hidden');
+        this.gameActive = false;
     }
 
     resetGameState() {
@@ -576,6 +633,14 @@ class ChessGame {
         this.currentPlayer = this.currentPlayer === 'white' ? 'black' : 'white';
         this.renderBoard();
         this.updateTurnIndicators();
+
+        // Switch Chess Clock
+        if (this.gameMode === 'online') {
+            this.startClock(this.currentPlayer);
+        }
+
+
+
         this.updateMoveHistoryDisplay();
         this.checkGameEnd();
         if (!this.isGameOver && this.gameMode === 'vs-computer' && this.currentPlayer === 'black' && !isRemote) {

@@ -1677,3 +1677,29 @@ body {
 #back-to-modes-online:hover {
     background: rgba(255, 255, 255, 0.1);
 }
+/* Timer Styles */
+.timer {
+    font-family: 'Courier New', monospace;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 5px 10px;
+    border-radius: 8px;
+    margin: 5px 0;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+.timer.low-time {
+    color: #ff4757;
+    animation: pulseRed 1s infinite;
+    border-color: #ff4757;
+}
+
+@keyframes pulseRed {
+    0% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 71, 87, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); }
+}
+
