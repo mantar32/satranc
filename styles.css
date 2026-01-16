@@ -1478,3 +1478,36 @@ body {
     font-size: 1.5rem;
 }
 
+
+/* Uniform Square Stats for all Control Buttons */
+.game-controls {
+    display: flex;
+    justify-content: center;
+    gap: 15px; /* Increase gap for cleaner look */
+}
+
+.game-controls .control-btn {
+    width: 55px !important;
+    height: 55px !important;
+    border-radius: 12px; /* Smoother rounded corners */
+    padding: 0;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    min-width: unset; /* Remove min-width override */
+    transition: transform 0.2s, background 0.2s;
+}
+
+.game-controls .control-btn .btn-icon {
+    font-size: 1.8rem;
+    margin: 0;
+    line-height: 1;
+}
+
+/* Specific colors for clearer distinction */
+#main-menu { background: rgba(71, 85, 105, 0.8); border: 1px solid rgba(255,255,255,0.1); }
+#new-game { background: rgba(37, 99, 235, 0.8); border: 1px solid rgba(64, 126, 235, 0.3); }
+
+#main-menu:hover { background: rgba(71, 85, 105, 1); }
+#new-game:hover { background: rgba(37, 99, 235, 1); }
+
