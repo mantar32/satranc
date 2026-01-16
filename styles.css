@@ -1252,6 +1252,7 @@ body {
         margin-top: -1.5vw;
     }
 }
+
 /* Specificity Fix for Cheat Button */
 #cheat-btn.hidden {
     display: none !important;
@@ -1268,7 +1269,8 @@ body {
     height: 100% !important;
     object-fit: contain !important;
     margin-top: 0 !important;
-    font-size: 0 !important; /* Hide any fallback text */
+    font-size: 0 !important;
+    /* Hide any fallback text */
     line-height: normal !important;
 }
 
@@ -1295,8 +1297,9 @@ body {
     opacity: 0.7;
     margin-top: auto;
     width: 100%;
-    font-family: 'Courier New', monospace; /* Code-like font */
-    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    font-family: 'Courier New', monospace;
+    /* Code-like font */
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
     animation: fadeIn 2s ease-in;
 }
 
@@ -1309,20 +1312,52 @@ body {
 
 /* Developer Footer Animation - Neon/Rainbow */
 @keyframes rainbow-glow {
-    0% { color: #ff0000; text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000; }
-    14% { color: #ff7f00; text-shadow: 0 0 10px #ff7f00, 0 0 20px #ff7f00; }
-    28% { color: #ffff00; text-shadow: 0 0 10px #ffff00, 0 0 20px #ffff00; }
-    42% { color: #00ff00; text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00; }
-    57% { color: #0000ff; text-shadow: 0 0 10px #0000ff, 0 0 20px #0000ff; }
-    71% { color: #4b0082; text-shadow: 0 0 10px #4b0082, 0 0 20px #4b0082; }
-    85% { color: #8b00ff; text-shadow: 0 0 10px #8b00ff, 0 0 20px #8b00ff; }
-    100% { color: #ff0000; text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000; }
+    0% {
+        color: #ff0000;
+        text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000;
+    }
+
+    14% {
+        color: #ff7f00;
+        text-shadow: 0 0 10px #ff7f00, 0 0 20px #ff7f00;
+    }
+
+    28% {
+        color: #ffff00;
+        text-shadow: 0 0 10px #ffff00, 0 0 20px #ffff00;
+    }
+
+    42% {
+        color: #00ff00;
+        text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00;
+    }
+
+    57% {
+        color: #0000ff;
+        text-shadow: 0 0 10px #0000ff, 0 0 20px #0000ff;
+    }
+
+    71% {
+        color: #4b0082;
+        text-shadow: 0 0 10px #4b0082, 0 0 20px #4b0082;
+    }
+
+    85% {
+        color: #8b00ff;
+        text-shadow: 0 0 10px #8b00ff, 0 0 20px #8b00ff;
+    }
+
+    100% {
+        color: #ff0000;
+        text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000;
+    }
 }
 
 .dev-footer {
     animation: rainbow-glow 5s linear infinite;
     font-weight: bold;
-    opacity: 1; /* Make it fully visible for the effect */
+    opacity: 1;
+    /* Make it fully visible for the effect */
 }
 
 /* Tea Button Styling */
@@ -1336,7 +1371,7 @@ body {
     font-size: 0.8rem;
     margin-left: 10px;
     transition: transform 0.2s;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 .tea-btn:hover {
@@ -1364,10 +1399,25 @@ body {
 }
 
 @keyframes popInAndOut {
-    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-    20% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
-    80% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-    100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+    }
+
+    20% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 1;
+    }
+
+    80% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+    }
 }
 
 /* Fireworks Canvas */
@@ -1384,21 +1434,39 @@ body {
 
 /* Make Modal Transparent for Fireworks Visibility */
 .modal {
-    background: rgba(0, 0, 0, 0.6); /* Slightly more transparent */
+    background: rgba(0, 0, 0, 0.6);
+    /* Slightly more transparent */
     backdrop-filter: blur(4px);
 }
+
 .modal-content {
-    background: rgba(26, 26, 46, 0.95); /* Keep content readable */
+    background: rgba(26, 26, 46, 0.95);
+    /* Keep content readable */
     border: 1px solid rgba(233, 69, 96, 0.5);
     box-shadow: 0 0 30px rgba(233, 69, 96, 0.2);
 }
 
 /* Enhanced Tea Animation - Slide Up */
 @keyframes teaSlideUp {
-    0% { transform: translate(-50%, 100vh) scale(0.5); opacity: 0; }
-    40% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
-    60% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-    100% { transform: translate(-50%, -100vh) scale(0.5); opacity: 0; }
+    0% {
+        transform: translate(-50%, 100vh) scale(0.5);
+        opacity: 0;
+    }
+
+    40% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 1;
+    }
+
+    60% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(-50%, -100vh) scale(0.5);
+        opacity: 0;
+    }
 }
 
 .tea-animation.active {
@@ -1421,11 +1489,13 @@ body {
     cursor: pointer;
     transition: all 0.3s ease;
     backdrop-filter: blur(4px);
-    margin-left: auto; /* Push to right if inside flex container */
+    margin-left: auto;
+    /* Push to right if inside flex container */
 }
 
 .tea-btn:hover {
-    background: rgba(230, 126, 34, 0.8); /* Tea color */
+    background: rgba(230, 126, 34, 0.8);
+    /* Tea color */
     transform: scale(1.1) rotate(10deg);
     box-shadow: 0 0 15px rgba(230, 126, 34, 0.6);
     border-color: rgba(230, 126, 34, 1);
@@ -1440,7 +1510,7 @@ body {
 
 /* Ensure tea button is above other elements */
 .tea-btn {
-    position: relative; 
+    position: relative;
     z-index: 100;
 }
 
@@ -1483,18 +1553,21 @@ body {
 .game-controls {
     display: flex;
     justify-content: center;
-    gap: 15px; /* Increase gap for cleaner look */
+    gap: 15px;
+    /* Increase gap for cleaner look */
 }
 
 .game-controls .control-btn {
     width: 55px !important;
     height: 55px !important;
-    border-radius: 12px; /* Smoother rounded corners */
+    border-radius: 12px;
+    /* Smoother rounded corners */
     padding: 0;
     justify-content: center;
     align-items: center;
     display: flex;
-    min-width: unset; /* Remove min-width override */
+    min-width: unset;
+    /* Remove min-width override */
     transition: transform 0.2s, background 0.2s;
 }
 
@@ -1505,11 +1578,23 @@ body {
 }
 
 /* Specific colors for clearer distinction */
-#main-menu { background: rgba(71, 85, 105, 0.8); border: 1px solid rgba(255,255,255,0.1); }
-#new-game { background: rgba(37, 99, 235, 0.8); border: 1px solid rgba(64, 126, 235, 0.3); }
+#main-menu {
+    background: rgba(71, 85, 105, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
 
-#main-menu:hover { background: rgba(71, 85, 105, 1); }
-#new-game:hover { background: rgba(37, 99, 235, 1); }
+#new-game {
+    background: rgba(37, 99, 235, 0.8);
+    border: 1px solid rgba(64, 126, 235, 0.3);
+}
+
+#main-menu:hover {
+    background: rgba(71, 85, 105, 1);
+}
+
+#new-game:hover {
+    background: rgba(37, 99, 235, 1);
+}
 
 
 /* Force hidden state to override flex display */
@@ -1520,7 +1605,8 @@ body {
 
 /* Enhanced Tea Animation */
 .tea-animation {
-    display: flex; /* Changed from just block/flex default */
+    display: flex;
+    /* Changed from just block/flex default */
     flex-direction: column;
     align-items: center;
     gap: 10px;
@@ -1535,17 +1621,38 @@ body {
     font-size: 1.5rem;
     font-weight: bold;
     color: #fff;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-    background: rgba(0,0,0,0.4);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.4);
     padding: 5px 15px;
     border-radius: 20px;
     backdrop-filter: blur(4px);
     opacity: 0;
-    animation: fadeInText 0.5s ease 0.5s forwards; /* Delay text appearance */
+    /* Hidden by default */
+}
+
+/* Only run animation when parent is active */
+.tea-animation.active .tea-text {
+    animation: fadeInText 0.5s ease 0.5s forwards;
 }
 
 @keyframes fadeInText {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+/* Ensure tea icon also re-animates nicely */
+.tea-animation.active .tea-icon {
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+    0% { transform: scale(0); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
 }
 
