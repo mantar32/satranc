@@ -169,8 +169,12 @@ class ChessGame {
         document.getElementById('start-menu').classList.add('hidden');
         document.getElementById('game-screen').classList.remove('hidden');
 
-        // Hide cheat button by default (only enabled for Online White)
+        document.getElementById('start-menu').classList.add('hidden');
+        document.getElementById('game-screen').classList.remove('hidden');
+
+        // Hide online-only buttons by default (reset state)
         document.getElementById('cheat-btn').classList.add('hidden');
+        document.getElementById('tea-btn').classList.add('hidden');
 
         const diffNames = ['', 'Çok Kolay', 'Kolay', 'Orta', 'Zor', 'Çok Zor'];
         document.getElementById('game-mode-label').textContent = mode === 'two-player' ? '2 Kişilik Mod' : `Bilgisayar (${diffNames[difficulty]})`;
@@ -204,10 +208,6 @@ class ChessGame {
             } else {
                 document.getElementById('cheat-btn').classList.add('hidden');
             }
-        } else {
-            // Hide online-only buttons
-            document.getElementById('tea-btn').classList.add('hidden');
-            document.getElementById('cheat-btn').classList.add('hidden');
         }
         this.createBoard();
         this.setupPieces();
