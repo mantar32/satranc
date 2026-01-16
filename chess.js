@@ -140,6 +140,15 @@ class ChessGame {
         document.querySelectorAll('.difficulty-btn').forEach(btn => {
             btn.addEventListener('click', () => this.startGame('vs-computer', parseInt(btn.dataset.level)));
         });
+
+        // Tea Button Listeners
+        // Button in White Panel -> Target is White (e.g. Black clicks it to send tea to White)
+        const whitePanelBtn = document.querySelector('#white-player .tea-btn');
+        if (whitePanelBtn) whitePanelBtn.addEventListener('click', () => this.sendTea('white'));
+
+        // Button in Black Panel -> Target is Black
+        const blackPanelBtn = document.querySelector('#black-player .tea-btn');
+        if (blackPanelBtn) blackPanelBtn.addEventListener('click', () => this.sendTea('black'));
     }
 
     showDifficultySelection() {
