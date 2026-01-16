@@ -72,7 +72,15 @@ class ChessGame {
             });
 
             this.socket.on('opponent_move', (move) => {
-                console.log('Received opponent move:', move);
+                // Sync opponent's timer
+                if (move.timeLeft !== undefined) {
+                    this.timeRemaining[move.color] = move.timeLeft;
+                    this.updateClockDisplay(move.color);
+                }
+
+                // Log for debugging
+                console.log('Received opponent move:', move, 'Time Left:', move.timeLeft);
+
                 this.makeMove(move.from.row, move.from.col, move.to.row, move.to.col, true);
             });
 
@@ -80,6 +88,10 @@ class ChessGame {
                 if (type === 'tea') {
                     this.showTeaAnimation();
                 }
+            });
+
+            this.socket.on('game_over_timeout', (data) => {
+                this.endGame(`Süre Bitti! ${data.winner === 'white' ? 'Beyaz' : 'Siyah'} kazandı.`);
             });
 
             this.socket.on('player_left', () => {
@@ -222,10 +234,10 @@ class ChessGame {
                 document.getElementById('cheat-btn').classList.add('hidden');
             }
 
-            // Init Chess Clock
-            this.timeRemaining = { white: 60, black: 60 };
-            document.getElementById('white-timer').textContent = "01:00";
-            document.getElementById('black-timer').textContent = "01:00";
+            // Init Chess Clock (2 Minutes)
+            this.timeRemaining = { white: 120, black: 120 };
+            document.getElementById('white-timer').textContent = "02:00";
+            document.getElementById('black-timer').textContent = "02:00";
             document.getElementById('white-timer').classList.remove('hidden');
             document.getElementById('black-timer').classList.remove('hidden');
 
@@ -253,8 +265,11 @@ class ChessGame {
 
             if (this.timeRemaining[color] <= 0) {
                 this.stopClock();
-                const winner = color === 'white' ? 'black' : 'white';
-                this.endGame(`Süre Bitti! ${winner === 'white' ? 'Beyaz' : 'Siyah'} kazandı.`);
+                // Only emit loss if it's MY time that ran out (prevents race conditions)
+                if (color === this.myColor) {
+                    this.socket.emit('time_out', { roomId: this.roomId, color: this.myColor });
+                    this.endGame('Süre Bitti! Kaybettiniz.');
+                }
             }
         }, 1000);
     }
@@ -587,15 +602,20 @@ class ChessGame {
     }
 
     makeMove(fromRow, fromCol, toRow, toCol, isRemote = false) {
+        const piece = this.board[fromRow][fromCol];
         // Validation for online moves
         if (this.gameMode === 'online' && !isRemote) {
             this.socket.emit('make_move', {
                 roomId: this.roomId,
-                move: { from: { row: fromRow, col: fromCol }, to: { row: toRow, col: toCol } }
+                move: {
+                    from: { row: fromRow, col: fromCol },
+                    to: { row: toRow, col: toCol },
+                    color: this.myColor,
+                    timeLeft: this.timeRemaining[this.myColor] // Sync Timer
+                }
             });
         }
 
-        const piece = this.board[fromRow][fromCol];
         const captured = this.board[toRow][toCol];
         const moveData = this.validMoves.find(m => m.row === toRow && m.col === toCol) || {};
         this.moveHistory.push({

@@ -88,6 +88,11 @@ io.on('connection', (socket) => {
         socket.to(roomId).emit('receive_interaction', { type, fromColor });
     });
 
+    socket.on('time_out', ({ roomId, color }) => {
+        const winner = color === 'white' ? 'black' : 'white';
+        io.to(roomId).emit('game_over_timeout', { winner });
+    });
+
     socket.on('disconnect', () => {
         console.log('User disconnected:', socket.id);
         // Clean up rooms
