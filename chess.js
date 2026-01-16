@@ -72,6 +72,7 @@ class ChessGame {
             });
 
             this.socket.on('opponent_move', (move) => {
+                console.log('Received opponent move:', move);
                 this.makeMove(move.from.row, move.from.col, move.to.row, move.to.col, true);
             });
 
@@ -142,13 +143,13 @@ class ChessGame {
         });
 
         // Tea Button Listeners
-        // Button in White Panel -> Target is White (e.g. Black clicks it to send tea to White)
-        const whitePanelBtn = document.querySelector('#white-player .tea-btn');
-        if (whitePanelBtn) whitePanelBtn.addEventListener('click', () => this.sendTea('white'));
-
-        // Button in Black Panel -> Target is Black
-        const blackPanelBtn = document.querySelector('#black-player .tea-btn');
-        if (blackPanelBtn) blackPanelBtn.addEventListener('click', () => this.sendTea('black'));
+        // Clicking ANY tea button sends tea to the opponent
+        document.querySelectorAll('.tea-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault(); // Prevent focus issues
+                this.sendTea();
+            });
+        });
     }
 
     showDifficultySelection() {
@@ -743,27 +744,31 @@ class ChessGame {
 
     // --- Interaction & Effects ---
 
-    sendTea(color) {
-        if (this.gameMode !== 'online' || !this.roomId) return;
-        // Only allow sending to opponent
-        if (color === this.myColor) return;
+    // --- Interaction & Effects ---
 
+    sendTea() {
+        if (this.gameMode !== 'online' || !this.roomId) return;
+
+        // Always send tea to the opponent (the other person in the room)
         this.socket.emit('send_interaction', {
             roomId: this.roomId,
             type: 'tea',
             fromColor: this.myColor
         });
-        // Show local feedback (optional, maybe a toast)
+
+        // Optional: Show a small "Sent!" toast or animation locally
     }
 
     showTeaAnimation() {
         const teaEl = document.getElementById('tea-animation');
         teaEl.classList.remove('hidden');
-        // Animation is handled by CSS keyframes 'popInAndOut'
+        teaEl.classList.add('active'); // Trigger CSS animation
+
         // Reset after animation
         setTimeout(() => {
+            teaEl.classList.remove('active');
             teaEl.classList.add('hidden');
-        }, 2000);
+        }, 2500);
     }
 
     triggerFireworks() {

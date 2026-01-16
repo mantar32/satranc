@@ -1431,3 +1431,16 @@ body {
     border-color: rgba(230, 126, 34, 1);
 }
 
+
+/* Tea Button Hover & Active States */
+.tea-btn:active {
+    transform: scale(0.95);
+    background: rgba(230, 126, 34, 1);
+}
+
+/* Ensure tea button is above other elements */
+.tea-btn {
+    position: relative; 
+    z-index: 100;
+}
+
