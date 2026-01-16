@@ -782,6 +782,26 @@ class ChessGame {
         } else { statusEl.textContent = ''; statusEl.className = 'game-status'; }
     }
 
+    hasAnyValidMoves(color) {
+        for (let r = 0; r < 8; r++) {
+            for (let c = 0; c < 8; c++) {
+                const piece = this.board[r][c];
+                if (piece && piece.color === color) {
+                    if (this.getValidMoves(r, c).length > 0) return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    isCheckmate(color) {
+        return this.isKingInCheck(color) && !this.hasAnyValidMoves(color);
+    }
+
+    isDraw() {
+        return !this.isKingInCheck(this.currentPlayer) && !this.hasAnyValidMoves(this.currentPlayer);
+    }
+
     checkGameEnd() {
         if (this.isCheckmate(this.currentPlayer)) {
             const winner = this.currentPlayer === 'white' ? 'black' : 'white';
