@@ -142,14 +142,14 @@ class ChessGame {
             btn.addEventListener('click', () => this.startGame('vs-computer', parseInt(btn.dataset.level)));
         });
 
-        // Tea Button Listeners
-        // Clicking ANY tea button sends tea to the opponent
-        document.querySelectorAll('.tea-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault(); // Prevent focus issues
+        // Tea Button Listener (Single button in controls)
+        const teaBtn = document.getElementById('tea-btn');
+        if (teaBtn) {
+            teaBtn.addEventListener('click', (e) => {
+                e.preventDefault();
                 this.sendTea();
             });
-        });
+        }
     }
 
     showDifficultySelection() {
@@ -190,7 +190,7 @@ class ChessGame {
 
             // Toggle perspective class for flipping panels via CSS
             document.getElementById('game-mode-label').textContent = 'Online Çok Oyunculu';
-            document.querySelectorAll('.tea-btn').forEach(btn => btn.classList.remove('hidden'));
+            document.getElementById('tea-btn').classList.remove('hidden');
 
             if (this.myColor === 'black') {
                 document.querySelector('.game-container').classList.add('perspective-black');
@@ -206,7 +206,7 @@ class ChessGame {
             }
         } else {
             // Hide online-only buttons
-            document.querySelectorAll('.tea-btn').forEach(btn => btn.classList.add('hidden'));
+            document.getElementById('tea-btn').classList.add('hidden');
             document.getElementById('cheat-btn').classList.add('hidden');
         }
         this.createBoard();

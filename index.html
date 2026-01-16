@@ -122,14 +122,11 @@
                         <div class="captured-pieces" id="white-captured"></div>
                     </div>
                     <div class="turn-indicator" id="white-turn">Sıra Sizde</div>
-                    <button class="tea-btn hidden" id="tea-btn-white" onclick="game.sendTea('white')">☕ Çay İkram
-                        Et</button>
                 </div>
 
                 <div class="board-wrapper">
                     <div class="board-glow"></div>
                     <div class="chess-board" id="chess-board"></div>
-
                 </div>
 
                 <div class="player-panel black-panel">
@@ -139,8 +136,6 @@
                         <div class="captured-pieces" id="black-captured"></div>
                     </div>
                     <div class="turn-indicator hidden" id="black-turn">Sıra Sizde</div>
-                    <button class="tea-btn hidden" id="tea-btn-black" onclick="game.sendTea('black')">☕ Çay İkram
-                        Et</button>
                 </div>
             </main>
 
@@ -152,6 +147,10 @@
                 <button class="control-btn" id="new-game">
                     <span class="btn-icon">🔄</span>
                     <span>Yeni Oyun</span>
+                </button>
+                <button class="control-btn hidden tea-control-btn" id="tea-btn">
+                    <span class="btn-icon">☕</span>
+                    <span>Çay Ismarla</span>
                 </button>
                 <button class="control-btn hidden" id="cheat-btn">
                     <span class="btn-icon">🤖</span>
