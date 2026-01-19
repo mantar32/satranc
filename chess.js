@@ -165,15 +165,17 @@ class ChessGame {
             });
 
             this.socket.on('opponent_disconnected', () => {
-                // Show notification with countdown
+                // Show alert notification (like voice command)
+                alert('🏃 Rakip oyundan kaçtı!');
+
+                // Show countdown on game status
                 this.isGameOver = true;
                 this.stopClock();
                 const statusEl = document.getElementById('game-status');
-                if (statusEl) statusEl.textContent = 'Rakip oyundan kaçtı!';
 
                 let countdown = 5;
                 const countdownInterval = setInterval(() => {
-                    if (statusEl) statusEl.textContent = `Rakip oyundan kaçtı! (${countdown}s sonra lobiye dönülüyor...)`;
+                    if (statusEl) statusEl.textContent = `Lobiye dönülüyor... (${countdown}s)`;
                     countdown--;
                     if (countdown < 0) {
                         clearInterval(countdownInterval);
