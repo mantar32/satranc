@@ -1867,3 +1867,9 @@ body {
         grid-template-columns: 1fr;
     }
 }
+
+/* Fix piece hover in rotated perspective */
+.perspective-black .piece:hover {
+    transform: rotate(180deg) scale(1.1);
+}
+

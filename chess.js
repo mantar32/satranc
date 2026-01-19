@@ -165,7 +165,7 @@ class ChessGame {
             });
 
             this.socket.on('opponent_disconnected', () => {
-                alert('Rakip oyundan ayrıldı!');
+                alert('Rakip oyundan kaçtı!');
                 this.goToMainMenu();
             });
 
@@ -353,6 +353,13 @@ class ChessGame {
         // Hide online-only buttons by default (reset state)
         document.getElementById('cheat-btn').classList.add('hidden');
         document.getElementById('tea-btn').classList.add('hidden');
+
+        // Hide restart button for online/public lobby games
+        if (mode === 'online') {
+            document.getElementById('new-game').classList.add('hidden');
+        } else {
+            document.getElementById('new-game').classList.remove('hidden');
+        }
 
         const diffNames = ['', 'Çok Kolay', 'Kolay', 'Orta', 'Zor', 'Çok Zor'];
         document.getElementById('game-mode-label').textContent = mode === 'two-player' ? '2 Kişilik Mod' : `Bilgisayar (${diffNames[difficulty]})`;
