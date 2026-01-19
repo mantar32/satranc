@@ -774,16 +774,19 @@ class ChessGame {
     }
 
     triggerCheat() {
-        if (this.gameMode !== 'online' || this.myColor !== 'white') return;
-        if (this.currentPlayer !== 'white') {
+        if (this.gameMode !== 'online') return;
+
+        // Ensure it's MY turn
+        if (this.currentPlayer !== this.myColor) {
             alert("Hamle sırası sizde değil!");
             return;
         }
+
         if (this.isAIThinking) return;
 
-        console.log("Cheat activated for White... Analyzing deeper...");
+        console.log(`Cheat activated for ${this.myColor}... Analyzing deeper...`);
         // Use Depth 5 and 5 seconds for Cheat Mode
-        this.makeMoveAI('white', 5, 5000);
+        this.makeMoveAI(this.myColor, 5, 5000);
     }
 
     findBestMove(depth, playerColor) {
