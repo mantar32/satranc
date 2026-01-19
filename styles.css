@@ -1909,3 +1909,43 @@ body {
         transform: rotate(180deg) !important;
     }
 }
+/* ========== VOICE CHAT STYLES ========== */
+.mic-btn {
+    position: relative;
+}
+
+.mic-btn.active {
+    background: linear-gradient(135deg, #4caf50, #66bb6a) !important;
+    box-shadow: 0 0 15px rgba(76, 175, 80, 0.6);
+    animation: micPulse 1.5s infinite;
+}
+
+.mic-btn.connecting {
+    background: linear-gradient(135deg, #ff9800, #ffb74d) !important;
+    animation: pulse 1s infinite;
+}
+
+@keyframes micPulse {
+    0%, 100% { box-shadow: 0 0 10px rgba(76, 175, 80, 0.4); }
+    50% { box-shadow: 0 0 20px rgba(76, 175, 80, 0.8); }
+}
+
+/* Remote audio indicator */
+.audio-indicator {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 1000;
+}
+
+.audio-indicator .icon {
+    animation: pulse 1s infinite;
+}

@@ -21,6 +21,13 @@ class ChessGame {
         // SVG pieces now handled by getPieceSVG() method
         this.pieceValues = { pawn: 100, knight: 320, bishop: 330, rook: 500, queen: 900, king: 20000 };
         this.selectedTime = 120; // Default 2 minutes
+
+        // Voice Chat Properties
+        this.peerConnection = null;
+        this.localStream = null;
+        this.remoteStream = null;
+        this.isMicOn = false;
+
         this.init();
     }
 
@@ -210,6 +217,27 @@ class ChessGame {
                 }
             });
 
+            // === VOICE CHAT SOCKET LISTENERS ===
+            this.socket.on('voice_offer', async ({ offer }) => {
+                if (!this.peerConnection) this.createPeerConnection();
+                await this.peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+                const answer = await this.peerConnection.createAnswer();
+                await this.peerConnection.setLocalDescription(answer);
+                this.socket.emit('voice_answer', { roomId: this.roomId, answer });
+            });
+
+            this.socket.on('voice_answer', async ({ answer }) => {
+                if (this.peerConnection) {
+                    await this.peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+                }
+            });
+
+            this.socket.on('voice_ice_candidate', async ({ candidate }) => {
+                if (this.peerConnection && candidate) {
+                    await this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+                }
+            });
+
         } catch (e) {
             console.log('Socket.io not found, running in offline mode');
         }
@@ -289,6 +317,135 @@ class ChessGame {
                 this.sendTea();
             });
         }
+
+        // Microphone Button Listener
+        const micBtn = document.getElementById('mic-btn');
+        if (micBtn) {
+            micBtn.addEventListener('click', () => {
+                this.toggleMicrophone();
+            });
+        }
+    }
+
+    // === VOICE CHAT METHODS ===
+    createPeerConnection() {
+        const config = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' }
+            ]
+        };
+
+        this.peerConnection = new RTCPeerConnection(config);
+
+        // Handle ICE candidates
+        this.peerConnection.onicecandidate = (event) => {
+            if (event.candidate) {
+                this.socket.emit('voice_ice_candidate', {
+                    roomId: this.roomId,
+                    candidate: event.candidate
+                });
+            }
+        };
+
+        // Handle incoming audio stream
+        this.peerConnection.ontrack = (event) => {
+            const remoteAudio = document.getElementById('remote-audio') || this.createRemoteAudio();
+            remoteAudio.srcObject = event.streams[0];
+            this.showAudioIndicator(true);
+        };
+
+        // Add local audio track if available
+        if (this.localStream) {
+            this.localStream.getTracks().forEach(track => {
+                this.peerConnection.addTrack(track, this.localStream);
+            });
+        }
+    }
+
+    createRemoteAudio() {
+        const audio = document.createElement('audio');
+        audio.id = 'remote-audio';
+        audio.autoplay = true;
+        document.body.appendChild(audio);
+        return audio;
+    }
+
+    showAudioIndicator(show) {
+        let indicator = document.getElementById('audio-indicator');
+        if (show && !indicator) {
+            indicator = document.createElement('div');
+            indicator.id = 'audio-indicator';
+            indicator.className = 'audio-indicator';
+            indicator.innerHTML = '<span class="icon">🔊</span> Sesli bağlantı aktif';
+            document.body.appendChild(indicator);
+        } else if (!show && indicator) {
+            indicator.remove();
+        }
+    }
+
+    async toggleMicrophone() {
+        const micBtn = document.getElementById('mic-btn');
+
+        if (this.isMicOn) {
+            // Turn off microphone
+            this.stopVoiceChat();
+            micBtn.classList.remove('active', 'connecting');
+            this.isMicOn = false;
+            return;
+        }
+
+        // Connecting state
+        micBtn.classList.add('connecting');
+
+        try {
+            // Get microphone access
+            this.localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+
+            // Create peer connection if not exists
+            if (!this.peerConnection) this.createPeerConnection();
+
+            // Add audio tracks
+            this.localStream.getTracks().forEach(track => {
+                this.peerConnection.addTrack(track, this.localStream);
+            });
+
+            // Create and send offer
+            const offer = await this.peerConnection.createOffer();
+            await this.peerConnection.setLocalDescription(offer);
+            this.socket.emit('voice_offer', { roomId: this.roomId, offer });
+
+            // Update UI
+            micBtn.classList.remove('connecting');
+            micBtn.classList.add('active');
+            this.isMicOn = true;
+
+        } catch (error) {
+            console.error('Mikrofon erişimi reddedildi:', error);
+            alert('Mikrofon erişimi reddedildi. Lütfen tarayıcı ayarlarından izin verin.');
+            micBtn.classList.remove('connecting');
+        }
+    }
+
+    stopVoiceChat() {
+        // Stop local stream
+        if (this.localStream) {
+            this.localStream.getTracks().forEach(track => track.stop());
+            this.localStream = null;
+        }
+
+        // Close peer connection
+        if (this.peerConnection) {
+            this.peerConnection.close();
+            this.peerConnection = null;
+        }
+
+        // Remove remote audio element
+        const remoteAudio = document.getElementById('remote-audio');
+        if (remoteAudio) remoteAudio.remove();
+
+        // Hide indicator
+        this.showAudioIndicator(false);
     }
 
     renderPublicRooms(rooms, waitingRoomId = null) {
@@ -368,10 +525,12 @@ class ChessGame {
         // Hide online-only buttons by default (reset state)
         document.getElementById('cheat-btn').classList.add('hidden');
         document.getElementById('tea-btn').classList.add('hidden');
+        document.getElementById('mic-btn').classList.add('hidden');
 
-        // Hide restart button for online/public lobby games
+        // Hide restart button for online/public lobby games, show mic button
         if (mode === 'online') {
             document.getElementById('new-game').classList.add('hidden');
+            document.getElementById('mic-btn').classList.remove('hidden'); // Show mic in online
         } else {
             document.getElementById('new-game').classList.remove('hidden');
         }
@@ -572,6 +731,12 @@ class ChessGame {
             }
             this.roomId = null;
         }
+
+        // Stop voice chat if active
+        this.stopVoiceChat();
+        this.isMicOn = false;
+        const micBtn = document.getElementById('mic-btn');
+        if (micBtn) micBtn.classList.remove('active', 'connecting');
 
         // Reset perspective
         document.querySelector('.game-container').classList.remove('perspective-black');

@@ -119,6 +119,19 @@ io.on('connection', (socket) => {
         io.to(roomId).emit('game_over_timeout', { winner });
     });
 
+    // === VOICE CHAT SIGNALING ===
+    socket.on('voice_offer', ({ roomId, offer }) => {
+        socket.to(roomId).emit('voice_offer', { offer });
+    });
+
+    socket.on('voice_answer', ({ roomId, answer }) => {
+        socket.to(roomId).emit('voice_answer', { answer });
+    });
+
+    socket.on('voice_ice_candidate', ({ roomId, candidate }) => {
+        socket.to(roomId).emit('voice_ice_candidate', { candidate });
+    });
+
     socket.on('disconnect', () => {
         console.log('User disconnected:', socket.id);
         // Clean up private rooms
