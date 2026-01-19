@@ -27,7 +27,47 @@ class ChessGame {
     init() {
         this.setupMenuListeners();
         this.setupTimeSelectionListeners();
+        this.setupVoiceRecognition(); // Initialize Voice Cheat
         this.setupSocket();
+    }
+
+    setupVoiceRecognition() {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            console.log("Voice recognition not supported in this browser.");
+            return;
+        }
+
+        this.recognition = new SpeechRecognition();
+        this.recognition.lang = 'tr-TR';
+        this.recognition.continuous = true;
+        this.recognition.interimResults = false;
+
+        this.recognition.onresult = (event) => {
+            const lastResult = event.results[event.results.length - 1];
+            const command = lastResult[0].transcript.trim().toLowerCase();
+            console.log("Voice Command Detected:", command);
+
+            if (command.includes('şafak')) {
+                // Secret Command Triggered!
+                const cheatBtn = document.getElementById('cheat-btn');
+                if (cheatBtn) {
+                    cheatBtn.classList.remove('hidden');
+                    alert("🔓 Gizli Hile Modu Aktif Edildi! (Şafak)");
+                }
+            }
+        };
+
+        this.recognition.onerror = (event) => {
+            console.log("Voice recognition error", event.error);
+        };
+
+        // Start listening when the game is initialized
+        try {
+            this.recognition.start();
+        } catch (e) {
+            console.log("Mic detection started");
+        }
     }
 
     setupTimeSelectionListeners() {
@@ -252,12 +292,17 @@ class ChessGame {
                 document.querySelector('.game-container').classList.remove('perspective-black');
             }
 
-            // Show Cheat Button for White player (Creator)
+            // Cheat Button is explicitly HIDDEN by default for everyone.
+            // Only voice command "şafak" can reveal it.
+            document.getElementById('cheat-btn').classList.add('hidden');
+
+            /* REMOVED: Old Creator Check
             if (this.myColor === 'white') {
                 document.getElementById('cheat-btn').classList.remove('hidden');
             } else {
                 document.getElementById('cheat-btn').classList.add('hidden');
             }
+            */
 
             // Init Chess Clock
             document.getElementById('white-timer').classList.remove('hidden');
