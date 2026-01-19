@@ -476,6 +476,15 @@ body {
     transform: scale(1.1);
 }
 
+/* Override hover for black perspective - keep rotation */
+.perspective-black .piece {
+    transform: rotate(180deg);
+}
+
+.perspective-black .piece:hover {
+    transform: rotate(180deg) scale(1.1);
+}
+
 .piece.white {
     color: #fff;
     text-shadow:
@@ -1677,6 +1686,7 @@ body {
 #back-to-modes-online:hover {
     background: rgba(255, 255, 255, 0.1);
 }
+
 /* Timer Styles */
 .timer {
     font-family: 'Courier New', monospace;
@@ -1688,7 +1698,7 @@ body {
     border-radius: 8px;
     margin: 5px 0;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
 .timer.low-time {
@@ -1698,9 +1708,17 @@ body {
 }
 
 @keyframes pulseRed {
-    0% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.4); }
-    70% { box-shadow: 0 0 0 10px rgba(255, 71, 87, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); }
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.4);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(255, 71, 87, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 71, 87, 0);
+    }
 }
 
 
@@ -1755,8 +1773,15 @@ body {
 }
 
 /* Fallback/Safety Styles for Board */
-.square.light { background-color: #f0d9b5; background-color: var(--board-light, #f0d9b5); }
-.square.dark { background-color: #b58863; background-color: var(--board-dark, #b58863); }
+.square.light {
+    background-color: #f0d9b5;
+    background-color: var(--board-light, #f0d9b5);
+}
+
+.square.dark {
+    background-color: #b58863;
+    background-color: var(--board-dark, #b58863);
+}
 
 
 /* ========== PUBLIC LOBBY STYLES ========== */
@@ -1879,8 +1904,8 @@ body {
     .piece:hover {
         transform: none !important;
     }
+
     .perspective-black .piece:hover {
         transform: rotate(180deg) !important;
     }
 }
-

@@ -165,8 +165,21 @@ class ChessGame {
             });
 
             this.socket.on('opponent_disconnected', () => {
-                alert('Rakip oyundan kaçtı!');
-                this.goToMainMenu();
+                // Show notification with countdown
+                this.isGameOver = true;
+                this.stopClock();
+                const statusEl = document.getElementById('game-status');
+                if (statusEl) statusEl.textContent = 'Rakip oyundan kaçtı!';
+
+                let countdown = 5;
+                const countdownInterval = setInterval(() => {
+                    if (statusEl) statusEl.textContent = `Rakip oyundan kaçtı! (${countdown}s sonra lobiye dönülüyor...)`;
+                    countdown--;
+                    if (countdown < 0) {
+                        clearInterval(countdownInterval);
+                        this.goToMainMenu();
+                    }
+                }, 1000);
             });
 
             this.socket.on('error_message', (msg) => {
