@@ -77,7 +77,7 @@ class ChessGame {
                 }
 
                 // Set Time Limit from Server
-                if (data.timeLimit) {
+                if (data.timeLimit !== undefined && data.timeLimit !== null) {
                     this.timeRemaining = { white: data.timeLimit, black: data.timeLimit };
                 } else {
                     this.timeRemaining = { white: 120, black: 120 }; // Fallback
@@ -259,17 +259,23 @@ class ChessGame {
                 document.getElementById('cheat-btn').classList.add('hidden');
             }
 
-            // Init Chess Clock (Value already set in game_start event for online)
-            // But we need to update the display text to match
-            const startMinutes = Math.floor(this.timeRemaining.white / 60).toString().padStart(2, '0');
-            document.getElementById('white-timer').textContent = `${startMinutes}:00`;
-            document.getElementById('black-timer').textContent = `${startMinutes}:00`;
-
+            // Init Chess Clock
             document.getElementById('white-timer').classList.remove('hidden');
             document.getElementById('black-timer').classList.remove('hidden');
 
-            // Start clock for White immediately
-            this.startClock('white');
+            if (this.timeRemaining.white === 0) {
+                // Unlimited Time Mode
+                document.getElementById('white-timer').textContent = "∞";
+                document.getElementById('black-timer').textContent = "∞";
+                // Do NOT start clock
+            } else {
+                // Standard Timer Mode
+                const startMinutes = Math.floor(this.timeRemaining.white / 60).toString().padStart(2, '0');
+                document.getElementById('white-timer').textContent = `${startMinutes}:00`;
+                document.getElementById('black-timer').textContent = `${startMinutes}:00`;
+                // Start clock for White immediately
+                this.startClock('white');
+            }
         } else {
             // Hide online-only buttons
             // document.getElementById('tea-btn').classList.add('hidden'); // Already hidden by default
@@ -284,6 +290,8 @@ class ChessGame {
 
     startClock(color) {
         if (this.gameMode !== 'online') return;
+        if (this.timeRemaining[color] === 0) return; // Unlimited Time: Do nothing
+
         this.stopClock(); // Ensure no other clock is running
 
         this.clockInterval = setInterval(() => {
@@ -309,6 +317,11 @@ class ChessGame {
     }
 
     updateClockDisplay(color) {
+        if (this.timeRemaining[color] === 0) {
+            document.getElementById(`${color}-timer`).textContent = "∞";
+            return;
+        }
+
         const minutes = Math.floor(this.timeRemaining[color] / 60).toString().padStart(2, '0');
         const seconds = (this.timeRemaining[color] % 60).toString().padStart(2, '0');
         const timerElement = document.getElementById(`${color}-timer`);
