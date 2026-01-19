@@ -560,10 +560,20 @@ class ChessGame {
     }
 
     goToMainMenu() {
+        // Leave room properly based on game mode
         if (this.gameMode === 'online' && this.roomId) {
-            this.socket.emit('leave_room', this.roomId);
+            // Check if it's a public room (room_1, room_2, etc.)
+            if (this.roomId.startsWith('room_')) {
+                this.socket.emit('leave_public_room', this.roomId);
+            } else {
+                this.socket.emit('leave_room', this.roomId);
+            }
             this.roomId = null;
         }
+
+        // Reset perspective
+        document.querySelector('.game-container').classList.remove('perspective-black');
+
         document.getElementById('game-screen').classList.add('hidden');
         document.getElementById('start-menu').classList.remove('hidden');
         this.showModeSelection();
