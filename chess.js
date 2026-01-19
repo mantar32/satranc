@@ -200,6 +200,9 @@ class ChessGame {
                     this.roomId = null;
                 }
                 this.showModeSelection();
+                // Ensure time selection is visible again for next time
+                const timeSelection = document.querySelector('.time-selection');
+                if (timeSelection) timeSelection.classList.remove('hidden');
             });
         }
 
@@ -401,21 +404,11 @@ class ChessGame {
         const boardEl = document.getElementById('chess-board');
         boardEl.innerHTML = '';
 
-        const isBlack = this.gameMode === 'online' && this.myColor === 'black'; // Check if perspective should be flipped
-
-        if (isBlack) {
-            // Correct Flipped Loop:
-            for (let row = 7; row >= 0; row--) {
-                for (let col = 7; col >= 0; col--) {
-                    this.createSquare(boardEl, row, col);
-                }
-            }
-        } else {
-            // Standard Loop: Row 0 (Top) -> 7 (Bottom), Col 0 (Left) -> 7 (Right)
-            for (let row = 0; row < 8; row++) {
-                for (let col = 0; col < 8; col++) {
-                    this.createSquare(boardEl, row, col);
-                }
+        // Always render in standard order (0 to 7)
+        // CSS 'perspective-black' class on container handles the visual rotation for Black
+        for (let row = 0; row < 8; row++) {
+            for (let col = 0; col < 8; col++) {
+                this.createSquare(boardEl, row, col);
             }
         }
         this.updateGameStatus();

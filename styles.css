@@ -1744,3 +1744,12 @@ body {
     box-shadow: 0 0 10px rgba(52, 152, 219, 0.4);
 }
 
+
+/* Board Orientation for Black Player */
+.perspective-black .chess-board {
+    transform: rotate(180deg);
+}
+
+.perspective-black .piece {
+    transform: rotate(180deg);
+}
