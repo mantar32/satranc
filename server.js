@@ -33,7 +33,7 @@ for (let i = 1; i <= 8; i++) {
         players: [],
         white: null,
         black: null,
-        timeLimit: 120
+        timeLimit: 0
     };
 }
 

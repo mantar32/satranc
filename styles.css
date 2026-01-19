@@ -1873,3 +1873,14 @@ body {
     transform: rotate(180deg) scale(1.1);
 }
 
+
+/* Disable piece hover effects on touch devices */
+@media (hover: none) and (pointer: coarse) {
+    .piece:hover {
+        transform: none !important;
+    }
+    .perspective-black .piece:hover {
+        transform: rotate(180deg) !important;
+    }
+}
+
