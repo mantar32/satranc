@@ -1758,3 +1758,112 @@ body {
 .square.light { background-color: #f0d9b5; background-color: var(--board-light, #f0d9b5); }
 .square.dark { background-color: #b58863; background-color: var(--board-dark, #b58863); }
 
+
+/* ========== PUBLIC LOBBY STYLES ========== */
+.public-lobby {
+    text-align: center;
+}
+
+.public-rooms-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.room-card {
+    background: var(--bg-secondary);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.room-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.room-card .room-name {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+}
+
+.room-card .player-slots {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.room-card .player-slot {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    border: 2px dashed rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.room-card .player-slot.occupied {
+    background: var(--accent-danger);
+    border: 2px solid var(--accent-danger);
+    color: white;
+}
+
+.room-card .player-slot.empty {
+    background: rgba(76, 175, 80, 0.2);
+    border: 2px dashed #4caf50;
+}
+
+.room-card .join-btn {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.room-card .join-btn.available {
+    background: linear-gradient(135deg, #4caf50, #66bb6a);
+    color: white;
+}
+
+.room-card .join-btn.available:hover {
+    background: linear-gradient(135deg, #43a047, #4caf50);
+    transform: scale(1.02);
+}
+
+.room-card .join-btn.occupied {
+    background: linear-gradient(135deg, #f44336, #e57373);
+    color: white;
+    cursor: not-allowed;
+}
+
+.room-card .join-btn.waiting {
+    background: linear-gradient(135deg, #ff9800, #ffb74d);
+    color: white;
+    animation: pulse 1.5s infinite;
+}
+
+.room-card .join-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+@media (max-width: 500px) {
+    .public-rooms-grid {
+        grid-template-columns: 1fr;
+    }
+}

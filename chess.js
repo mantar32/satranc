@@ -180,6 +180,21 @@ class ChessGame {
                 }
             });
 
+            // === PUBLIC LOBBY SOCKET LISTENERS ===
+            this.socket.on('public_rooms_update', (rooms) => {
+                this.renderPublicRooms(rooms);
+            });
+
+            this.socket.on('joined_public_room', ({ roomId, color, waiting }) => {
+                this.roomId = roomId;
+                this.myColor = color;
+                this.gameMode = 'online';
+                if (waiting) {
+                    // Show waiting state on that room card
+                    this.renderPublicRooms(null, roomId); // Will re-render with waiting state
+                }
+            });
+
         } catch (e) {
             console.log('Socket.io not found, running in offline mode');
         }
@@ -215,6 +230,22 @@ class ChessGame {
             document.querySelector('.join-room-section').classList.remove('hidden');
         });
 
+        // Public Lobby Button
+        document.getElementById('public-lobby-btn').addEventListener('click', () => {
+            document.querySelector('.mode-selection').classList.add('hidden');
+            document.getElementById('public-lobby').classList.remove('hidden');
+            this.socket.emit('get_public_rooms');
+        });
+
+        // Back from Public Lobby
+        document.getElementById('back-to-modes-public').addEventListener('click', () => {
+            if (this.roomId) {
+                this.socket.emit('leave_public_room', this.roomId);
+                this.roomId = null;
+            }
+            this.showModeSelection();
+        });
+
         document.getElementById('create-room-btn').addEventListener('click', () => {
             this.socket.emit('create_room', { timeLimit: this.selectedTime });
         });
@@ -245,6 +276,59 @@ class ChessGame {
         }
     }
 
+    renderPublicRooms(rooms, waitingRoomId = null) {
+        const grid = document.getElementById('public-rooms-grid');
+        if (!grid) return;
+
+        // If rooms is null, just update waiting state for current room (keep existing cards)
+        if (rooms === null && waitingRoomId) {
+            const card = grid.querySelector(`[data-room-id="${waitingRoomId}"]`);
+            if (card) {
+                const btn = card.querySelector('.join-btn');
+                btn.textContent = 'Bekleniyor...';
+                btn.classList.remove('available');
+                btn.classList.add('waiting');
+                btn.disabled = true;
+            }
+            return;
+        }
+
+        grid.innerHTML = '';
+
+        rooms.forEach(room => {
+            const card = document.createElement('div');
+            card.className = 'room-card';
+            card.dataset.roomId = room.id;
+
+            const isMyWaitingRoom = waitingRoomId === room.id || this.roomId === room.id;
+
+            card.innerHTML = `
+                <div class="room-name">${room.name}</div>
+                <div class="player-slots">
+                    <div class="player-slot ${room.playerCount >= 1 ? 'occupied' : 'empty'}">
+                        ${room.playerCount >= 1 ? '👤' : ''}
+                    </div>
+                    <div class="player-slot ${room.playerCount >= 2 ? 'occupied' : 'empty'}">
+                        ${room.playerCount >= 2 ? '👤' : ''}
+                    </div>
+                </div>
+                <button class="join-btn ${room.isFull ? 'occupied' : (isMyWaitingRoom ? 'waiting' : 'available')}" 
+                        ${room.isFull || isMyWaitingRoom ? 'disabled' : ''}>
+                    ${room.isFull ? 'Dolu' : (isMyWaitingRoom ? 'Bekleniyor...' : 'Katıl')}
+                </button>
+            `;
+
+            const joinBtn = card.querySelector('.join-btn');
+            if (!room.isFull && !isMyWaitingRoom) {
+                joinBtn.addEventListener('click', () => {
+                    this.socket.emit('join_public_room', room.id);
+                });
+            }
+
+            grid.appendChild(card);
+        });
+    }
+
     showDifficultySelection() {
         document.querySelector('.mode-selection').classList.add('hidden');
         document.getElementById('difficulty-selection').classList.remove('hidden');
@@ -254,6 +338,7 @@ class ChessGame {
         document.querySelector('.mode-selection').classList.remove('hidden');
         document.getElementById('difficulty-selection').classList.add('hidden');
         document.getElementById('online-lobby').classList.add('hidden');
+        document.getElementById('public-lobby').classList.add('hidden');
     }
 
     startGame(mode, difficulty = 1) {

@@ -48,6 +48,14 @@
                             <span class="mode-desc">Uzaktaki arkadaşınla</span>
                         </div>
                     </button>
+
+                    <button class="mode-btn" id="public-lobby-btn">
+                        <div class="mode-icon">🏠</div>
+                        <div class="mode-info">
+                            <span class="mode-title">Herkese Açık Lobi</span>
+                            <span class="mode-desc">Açık odalara katıl</span>
+                        </div>
+                    </button>
                 </div>
 
                 <div class="online-lobby hidden" id="online-lobby">
@@ -83,6 +91,18 @@
                             <span>← Geri</span>
                         </button>
                     </div>
+                </div>
+
+                <!-- Public Lobby -->
+                <div class="public-lobby hidden" id="public-lobby">
+                    <h2>🏠 Herkese Açık Lobi</h2>
+                    <p style="color: var(--text-muted); margin-bottom: 15px;">Bir odaya katılarak oyna</p>
+                    <div class="public-rooms-grid" id="public-rooms-grid">
+                        <!-- Rooms will be rendered by JS -->
+                    </div>
+                    <button class="back-btn" id="back-to-modes-public" style="margin-top: 20px;">
+                        <span>← Geri</span>
+                    </button>
                 </div>
 
                 <div class="difficulty-selection hidden" id="difficulty-selection">

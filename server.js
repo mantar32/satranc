@@ -21,11 +21,34 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Store room states
+// Store room states (private rooms)
 const rooms = new Map();
+
+// Public Lobby Rooms (8 fixed rooms)
+const publicRooms = {};
+for (let i = 1; i <= 8; i++) {
+    publicRooms[`room_${i}`] = {
+        id: `room_${i}`,
+        name: `Oda ${i}`,
+        players: [],
+        white: null,
+        black: null,
+        timeLimit: 120
+    };
+}
 
 function generateRoomId() {
     return Math.random().toString(36).substring(2, 8).toUpperCase();
+}
+
+function broadcastPublicRooms(io) {
+    const roomStates = Object.values(publicRooms).map(r => ({
+        id: r.id,
+        name: r.name,
+        playerCount: r.players.length,
+        isFull: r.players.length >= 2
+    }));
+    io.emit('public_rooms_update', roomStates);
 }
 
 io.on('connection', (socket) => {
@@ -98,13 +121,87 @@ io.on('connection', (socket) => {
 
     socket.on('disconnect', () => {
         console.log('User disconnected:', socket.id);
-        // Clean up rooms
+        // Clean up private rooms
         rooms.forEach((room, roomId) => {
             if (room.players.includes(socket.id)) {
                 io.to(roomId).emit('opponent_disconnected');
                 rooms.delete(roomId);
             }
         });
+        // Clean up public rooms
+        Object.values(publicRooms).forEach(room => {
+            const idx = room.players.indexOf(socket.id);
+            if (idx !== -1) {
+                room.players.splice(idx, 1);
+                if (room.white === socket.id) room.white = null;
+                if (room.black === socket.id) room.black = null;
+                io.to(room.id).emit('opponent_disconnected');
+                socket.leave(room.id);
+                broadcastPublicRooms(io);
+            }
+        });
+    });
+
+    // === PUBLIC LOBBY EVENTS ===
+    socket.on('get_public_rooms', () => {
+        const roomStates = Object.values(publicRooms).map(r => ({
+            id: r.id,
+            name: r.name,
+            playerCount: r.players.length,
+            isFull: r.players.length >= 2
+        }));
+        socket.emit('public_rooms_update', roomStates);
+    });
+
+    socket.on('join_public_room', (roomId) => {
+        const room = publicRooms[roomId];
+        if (!room) {
+            socket.emit('error_message', 'Oda bulunamadı!');
+            return;
+        }
+        if (room.players.length >= 2) {
+            socket.emit('error_message', 'Oda dolu!');
+            return;
+        }
+        if (room.players.includes(socket.id)) {
+            socket.emit('error_message', 'Zaten bu odadasınız!');
+            return;
+        }
+
+        room.players.push(socket.id);
+        socket.join(roomId);
+
+        if (room.players.length === 1) {
+            room.white = socket.id;
+            socket.emit('joined_public_room', { roomId, color: 'white', waiting: true });
+        } else if (room.players.length === 2) {
+            room.black = socket.id;
+            socket.emit('joined_public_room', { roomId, color: 'black', waiting: false });
+            // Start game for both
+            io.to(roomId).emit('game_start', {
+                white: room.white,
+                black: room.black,
+                timeLimit: room.timeLimit
+            });
+        }
+
+        broadcastPublicRooms(io);
+        console.log(`User ${socket.id} joined public room ${roomId} (${room.players.length}/2)`);
+    });
+
+    socket.on('leave_public_room', (roomId) => {
+        const room = publicRooms[roomId];
+        if (room) {
+            const idx = room.players.indexOf(socket.id);
+            if (idx !== -1) {
+                room.players.splice(idx, 1);
+                if (room.white === socket.id) room.white = null;
+                if (room.black === socket.id) room.black = null;
+                socket.leave(roomId);
+                io.to(roomId).emit('opponent_disconnected');
+                broadcastPublicRooms(io);
+            }
+        }
     });
 });
 
