@@ -1753,3 +1753,8 @@ body {
 .perspective-black .piece {
     transform: rotate(180deg);
 }
+
+/* Fallback/Safety Styles for Board */
+.square.light { background-color: #f0d9b5; background-color: var(--board-light, #f0d9b5); }
+.square.dark { background-color: #b58863; background-color: var(--board-dark, #b58863); }
+

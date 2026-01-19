@@ -20,6 +20,9 @@ const PIECE_SVGS = {
     }
 };
 
+// Attach to window for global access
+window.PIECE_SVGS = PIECE_SVGS;
+
 // Export for use in chess.js
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = PIECE_SVGS;

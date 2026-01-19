@@ -439,7 +439,8 @@ class ChessGame {
 
     getPieceSVG(color, type) {
         // Uses PIECE_SVGS from pieces.js (Lichess Alpha style)
-        return PIECE_SVGS[color][type];
+        // Uses PIECE_SVGS from pieces.js (Lichess Alpha style)
+        return window.PIECE_SVGS ? window.PIECE_SVGS[color][type] : null;
     }
 
     setupEventListeners() {
