@@ -56,6 +56,14 @@
                             <span class="mode-desc">Açık odalara katıl</span>
                         </div>
                     </button>
+
+                    <button class="mode-btn" id="players-lobby-btn">
+                        <div class="mode-icon">👥</div>
+                        <div class="mode-info">
+                            <span class="mode-title">Online Oyuncular</span>
+                            <span class="mode-desc">Rakip davet et</span>
+                        </div>
+                    </button>
                 </div>
 
                 <div class="online-lobby hidden" id="online-lobby">
@@ -101,6 +109,22 @@
                         <!-- Rooms will be rendered by JS -->
                     </div>
                     <button class="back-btn" id="back-to-modes-public" style="margin-top: 20px;">
+                        <span>← Geri</span>
+                    </button>
+                </div>
+
+                <!-- Players Lobby -->
+                <div class="players-lobby hidden" id="players-lobby">
+                    <h2>👥 Online Oyuncular</h2>
+                    <div class="my-username-display">
+                        <span>Kullanıcı Adınız:</span>
+                        <strong id="my-username-label">Yükleniyor...</strong>
+                    </div>
+                    <p style="color: var(--text-muted); margin-bottom: 15px;">Bir oyuncuya tıklayarak davet gönderin</p>
+                    <div class="online-players-list" id="online-players-list">
+                        <!-- Players will be rendered by JS -->
+                    </div>
+                    <button class="back-btn" id="back-to-modes-players" style="margin-top: 20px;">
                         <span>← Geri</span>
                     </button>
                 </div>
@@ -228,6 +252,20 @@
         <div class="tea-icon">☕</div>
         <div class="tea-text">Afiyet Olsun!</div>
     </div>
+
+    <!-- Invite Modal -->
+    <div class="invite-modal hidden" id="invite-modal">
+        <div class="invite-content">
+            <div class="invite-icon">🎮</div>
+            <h3>Oyun Daveti!</h3>
+            <p><strong id="invite-from-name">Oyuncu</strong> sizi oyuna davet etti</p>
+            <div class="invite-buttons">
+                <button class="invite-btn accept" id="accept-invite-btn">✓ Kabul Et</button>
+                <button class="invite-btn reject" id="reject-invite-btn">✗ Reddet</button>
+            </div>
+        </div>
+    </div>
+
     <canvas id="fireworks-canvas"></canvas>
 
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>

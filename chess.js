@@ -28,6 +28,10 @@ class ChessGame {
         this.remoteStream = null;
         this.isMicOn = false;
 
+        // Lobby System Properties
+        this.username = null;
+        this.pendingInviteFrom = null;
+
         this.init();
     }
 
@@ -36,6 +40,7 @@ class ChessGame {
         this.setupTimeSelectionListeners();
         this.setupVoiceRecognition(); // Initialize Voice Cheat
         this.setupSocket();
+        this.initUsername(); // Initialize username for lobby
     }
 
     setupVoiceRecognition() {
@@ -238,6 +243,36 @@ class ChessGame {
                 }
             });
 
+            // === LOBBY SYSTEM SOCKET LISTENERS ===
+            this.socket.on('online_players_update', (players) => {
+                this.renderOnlinePlayers(players);
+            });
+
+            this.socket.on('game_invite', ({ fromId, fromUsername }) => {
+                this.pendingInviteFrom = fromId;
+                this.showInviteModal(fromUsername);
+            });
+
+            this.socket.on('invite_sent', ({ toUsername }) => {
+                alert(`✉️ ${toUsername} oyuncusuna davet gönderildi. Yanıt bekleniyor...`);
+            });
+
+            this.socket.on('invite_accepted', ({ roomId, color, opponentName }) => {
+                this.roomId = roomId;
+                this.myColor = color;
+                this.gameMode = 'online';
+                alert(`🎉 ${opponentName} daveti kabul etti! Oyun başlıyor...`);
+            });
+
+            this.socket.on('invite_rejected', ({ byUsername }) => {
+                alert(`❌ ${byUsername} davetinizi reddetti.`);
+            });
+
+            this.socket.on('invite_cancelled', () => {
+                this.hideInviteModal();
+                this.pendingInviteFrom = null;
+            });
+
         } catch (e) {
             console.log('Socket.io not found, running in offline mode');
         }
@@ -289,6 +324,36 @@ class ChessGame {
             this.showModeSelection();
         });
 
+        // Players Lobby Button
+        document.getElementById('players-lobby-btn').addEventListener('click', () => {
+            document.querySelector('.mode-selection').classList.add('hidden');
+            document.getElementById('players-lobby').classList.remove('hidden');
+            document.getElementById('my-username-label').textContent = this.username;
+            this.socket.emit('register_player', this.username);
+            this.socket.emit('get_online_players');
+        });
+
+        // Back from Players Lobby
+        document.getElementById('back-to-modes-players').addEventListener('click', () => {
+            this.showModeSelection();
+        });
+
+        // Invite Modal Buttons
+        document.getElementById('accept-invite-btn').addEventListener('click', () => {
+            if (this.pendingInviteFrom) {
+                this.socket.emit('invite_response', { fromId: this.pendingInviteFrom, accepted: true });
+                this.hideInviteModal();
+            }
+        });
+
+        document.getElementById('reject-invite-btn').addEventListener('click', () => {
+            if (this.pendingInviteFrom) {
+                this.socket.emit('invite_response', { fromId: this.pendingInviteFrom, accepted: false });
+                this.hideInviteModal();
+                this.pendingInviteFrom = null;
+            }
+        });
+
         document.getElementById('create-room-btn').addEventListener('click', () => {
             this.socket.emit('create_room', { timeLimit: this.selectedTime });
         });
@@ -324,6 +389,85 @@ class ChessGame {
             micBtn.addEventListener('click', () => {
                 this.toggleMicrophone();
             });
+        }
+    }
+
+    // === LOBBY SYSTEM METHODS ===
+    initUsername() {
+        // Check if username exists in localStorage
+        let savedUsername = localStorage.getItem('chessUsername');
+        if (!savedUsername) {
+            savedUsername = this.generateUsername();
+            localStorage.setItem('chessUsername', savedUsername);
+        }
+        this.username = savedUsername;
+    }
+
+    generateUsername() {
+        const prefixes = ['Satranc', 'Oyuncu', 'Usta', 'Sah', 'Vezir', 'Kale', 'At', 'Fil'];
+        const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+        const number = Math.floor(1000 + Math.random() * 9000);
+        return prefix + number;
+    }
+
+    renderOnlinePlayers(players) {
+        const list = document.getElementById('online-players-list');
+        if (!list) return;
+
+        list.innerHTML = '';
+
+        // Filter out self and sort by status
+        const otherPlayers = players.filter(p => p.id !== this.socket?.id);
+
+        if (otherPlayers.length === 0) {
+            list.innerHTML = '<div class="no-players-message">Şu an başka online oyuncu yok. Lütfen bekleyin...</div>';
+            return;
+        }
+
+        otherPlayers.forEach(player => {
+            const item = document.createElement('div');
+            item.className = 'player-item';
+
+            const statusText = {
+                'available': 'Müsait',
+                'in_game': 'Oyunda',
+                'invited': 'Davetli'
+            };
+
+            item.innerHTML = `
+                <div class="player-info">
+                    <span class="player-name">${player.username}</span>
+                    <span class="player-status ${player.status}">${statusText[player.status] || player.status}</span>
+                </div>
+                <button class="invite-btn" ${player.status !== 'available' ? 'disabled' : ''}>
+                    ${player.status === 'available' ? 'Davet Et' : 'Müsait Değil'}
+                </button>
+            `;
+
+            const inviteBtn = item.querySelector('.invite-btn');
+            if (player.status === 'available') {
+                inviteBtn.addEventListener('click', () => {
+                    this.socket.emit('send_invite', { targetId: player.id });
+                });
+            }
+
+            list.appendChild(item);
+        });
+    }
+
+    showInviteModal(fromUsername) {
+        const modal = document.getElementById('invite-modal');
+        const nameEl = document.getElementById('invite-from-name');
+        if (modal && nameEl) {
+            nameEl.textContent = fromUsername;
+            modal.classList.remove('hidden');
+        }
+    }
+
+    hideInviteModal() {
+        const modal = document.getElementById('invite-modal');
+        if (modal) {
+            modal.classList.add('hidden');
         }
     }
 
@@ -573,6 +717,7 @@ class ChessGame {
         document.getElementById('difficulty-selection').classList.add('hidden');
         document.getElementById('online-lobby').classList.add('hidden');
         document.getElementById('public-lobby').classList.add('hidden');
+        document.getElementById('players-lobby').classList.add('hidden');
     }
 
     startGame(mode, difficulty = 1) {

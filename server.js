@@ -51,8 +51,145 @@ function broadcastPublicRooms(io) {
     io.emit('public_rooms_update', roomStates);
 }
 
+// Online Players for Lobby System
+const onlinePlayers = new Map(); // socketId -> { username, status: 'available' | 'in_game' | 'invited' }
+
+function broadcastOnlinePlayers(io) {
+    const players = [];
+    onlinePlayers.forEach((player, socketId) => {
+        players.push({
+            id: socketId,
+            username: player.username,
+            status: player.status
+        });
+    });
+    io.emit('online_players_update', players);
+}
+
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
+
+    // === LOBBY SYSTEM EVENTS ===
+    socket.on('register_player', (username) => {
+        onlinePlayers.set(socket.id, {
+            username: username,
+            status: 'available'
+        });
+        console.log(`Player registered: ${username} (${socket.id})`);
+        broadcastOnlinePlayers(io);
+    });
+
+    socket.on('get_online_players', () => {
+        const players = [];
+        onlinePlayers.forEach((player, socketId) => {
+            players.push({
+                id: socketId,
+                username: player.username,
+                status: player.status
+            });
+        });
+        socket.emit('online_players_update', players);
+    });
+
+    socket.on('send_invite', ({ targetId }) => {
+        const sender = onlinePlayers.get(socket.id);
+        const target = onlinePlayers.get(targetId);
+
+        if (!sender || !target) {
+            socket.emit('error_message', 'Oyuncu bulunamadı!');
+            return;
+        }
+
+        if (target.status !== 'available') {
+            socket.emit('error_message', 'Oyuncu şu an müsait değil!');
+            return;
+        }
+
+        // Update statuses
+        sender.status = 'invited';
+        target.status = 'invited';
+
+        // Send invitation to target
+        io.to(targetId).emit('game_invite', {
+            fromId: socket.id,
+            fromUsername: sender.username
+        });
+
+        socket.emit('invite_sent', { toUsername: target.username });
+        broadcastOnlinePlayers(io);
+    });
+
+    socket.on('invite_response', ({ fromId, accepted }) => {
+        const responder = onlinePlayers.get(socket.id);
+        const inviter = onlinePlayers.get(fromId);
+
+        if (!responder || !inviter) {
+            socket.emit('error_message', 'Oyuncu bağlantısı kesildi!');
+            return;
+        }
+
+        if (accepted) {
+            // Create a new room for them
+            const roomId = generateRoomId();
+            rooms.set(roomId, {
+                players: [fromId, socket.id],
+                white: fromId,
+                black: socket.id,
+                timeLimit: 0 // Unlimited time for invite games
+            });
+
+            // Join both to the room
+            io.sockets.sockets.get(fromId)?.join(roomId);
+            socket.join(roomId);
+
+            // Update statuses
+            inviter.status = 'in_game';
+            responder.status = 'in_game';
+
+            // Notify both players
+            io.to(fromId).emit('invite_accepted', {
+                roomId,
+                color: 'white',
+                opponentName: responder.username
+            });
+            socket.emit('invite_accepted', {
+                roomId,
+                color: 'black',
+                opponentName: inviter.username
+            });
+
+            // Start game for both
+            io.to(roomId).emit('game_start', {
+                white: fromId,
+                black: socket.id,
+                timeLimit: 0
+            });
+
+            broadcastOnlinePlayers(io);
+        } else {
+            // Reject invitation
+            inviter.status = 'available';
+            responder.status = 'available';
+
+            io.to(fromId).emit('invite_rejected', {
+                byUsername: responder.username
+            });
+
+            broadcastOnlinePlayers(io);
+        }
+    });
+
+    socket.on('cancel_invite', ({ targetId }) => {
+        const sender = onlinePlayers.get(socket.id);
+        const target = onlinePlayers.get(targetId);
+
+        if (sender) sender.status = 'available';
+        if (target) target.status = 'available';
+
+        io.to(targetId).emit('invite_cancelled');
+        broadcastOnlinePlayers(io);
+    });
+
 
     socket.on('create_room', (data) => {
         const roomId = generateRoomId();
@@ -134,6 +271,13 @@ io.on('connection', (socket) => {
 
     socket.on('disconnect', () => {
         console.log('User disconnected:', socket.id);
+
+        // Remove from online players
+        if (onlinePlayers.has(socket.id)) {
+            onlinePlayers.delete(socket.id);
+            broadcastOnlinePlayers(io);
+        }
+
         // Clean up private rooms
         rooms.forEach((room, roomId) => {
             if (room.players.includes(socket.id)) {

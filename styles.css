@@ -1949,3 +1949,197 @@ body {
 .audio-indicator .icon {
     animation: pulse 1s infinite;
 }
+
+/* ========== PLAYERS LOBBY STYLES ========== */
+.players-lobby {
+    text-align: center;
+}
+
+.my-username-display {
+    background: var(--bg-secondary);
+    padding: 12px 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    align-items: center;
+}
+
+.my-username-display strong {
+    color: var(--accent-primary);
+    font-size: 1.1rem;
+}
+
+.online-players-list {
+    max-height: 300px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.player-item {
+    background: var(--bg-secondary);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 12px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+.player-item:hover {
+    border-color: var(--accent-primary);
+    transform: translateY(-2px);
+}
+
+.player-item .player-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.player-item .player-name {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.player-item .player-status {
+    font-size: 0.8rem;
+    padding: 3px 8px;
+    border-radius: 12px;
+}
+
+.player-status.available {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4caf50;
+}
+
+.player-status.in_game {
+    background: rgba(255, 152, 0, 0.2);
+    color: #ff9800;
+}
+
+.player-status.invited {
+    background: rgba(156, 39, 176, 0.2);
+    color: #9c27b0;
+}
+
+.player-item .invite-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.player-item .invite-btn:hover {
+    transform: scale(1.05);
+}
+
+.player-item .invite-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.player-item.self {
+    background: rgba(52, 152, 219, 0.1);
+    border-color: var(--accent-primary);
+}
+
+/* Invite Modal */
+.invite-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    animation: fadeIn 0.3s ease;
+}
+
+.invite-content {
+    background: var(--bg-secondary);
+    border-radius: 20px;
+    padding: 30px 40px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: slideUp 0.3s ease;
+}
+
+.invite-icon {
+    font-size: 4rem;
+    margin-bottom: 10px;
+}
+
+.invite-content h3 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    color: var(--text-primary);
+}
+
+.invite-content p {
+    color: var(--text-muted);
+    margin-bottom: 20px;
+}
+
+.invite-content p strong {
+    color: var(--accent-primary);
+}
+
+.invite-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.invite-btn {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.invite-btn.accept {
+    background: linear-gradient(135deg, #4caf50, #66bb6a);
+    color: white;
+}
+
+.invite-btn.accept:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 20px rgba(76, 175, 80, 0.4);
+}
+
+.invite-btn.reject {
+    background: linear-gradient(135deg, #f44336, #e57373);
+    color: white;
+}
+
+.invite-btn.reject:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 20px rgba(244, 67, 54, 0.4);
+}
+
+@keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.no-players-message {
+    color: var(--text-muted);
+    padding: 30px;
+    text-align: center;
+}
