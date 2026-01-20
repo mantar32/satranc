@@ -224,6 +224,9 @@ class ChessGame {
                 this.startGame('online');
 
                 if (waiting) {
+                    // BLOCK moves until opponent joins
+                    this.gameActive = false;
+
                     // Show waiting message in game status
                     const statusEl = document.getElementById('game-status');
                     if (statusEl) statusEl.innerHTML = `
@@ -234,7 +237,27 @@ class ChessGame {
 
                     // Show invite button while waiting
                     document.getElementById('invite-player-btn')?.classList.remove('hidden');
+                } else {
+                    this.gameActive = true;
                 }
+            });
+
+            this.socket.on('game_start', (data) => {
+                this.gameActive = true;
+                this.timeRemaining = { white: 0, black: 0 }; // Unlimited time
+
+                // Update UI
+                document.getElementById('game-status').textContent = "Oyun Başladı!";
+                document.getElementById('game-status').className = 'game-status';
+
+                if (data.white === this.socket.id) this.myColor = 'white';
+                if (data.black === this.socket.id) this.myColor = 'black';
+
+                // Hide invite button
+                document.getElementById('invite-player-btn')?.classList.add('hidden');
+
+                this.updateClockDisplay('white');
+                this.updateClockDisplay('black');
             });
 
             // === VOICE CHAT SOCKET LISTENERS ===
