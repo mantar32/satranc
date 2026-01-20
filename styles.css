@@ -2282,3 +2282,19 @@ body {
     margin-top: 10px;
     display: inline-block;
 }
+
+/* ========== BOARD FLIP (BLACK PERSPECTIVE) ========== */
+/* Rotate board 180 degrees */
+.perspective-black #chess-board {
+    transform: rotate(180deg);
+}
+
+/* Rotate pieces back 180 degrees so they stay upright */
+.perspective-black .piece {
+    transform: rotate(180deg);
+}
+
+/* Optional: Rotate coordinates if you have them */
+.perspective-black .coordinates {
+   transform: rotate(180deg); 
+}

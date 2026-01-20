@@ -855,6 +855,13 @@ class ChessGame {
             document.getElementById('white-name').textContent = this.myColor === 'white' ? 'Siz' : 'Rakip';
             document.getElementById('black-name').textContent = this.myColor === 'black' ? 'Siz' : 'Rakip';
 
+            // Set Board Perspective
+            if (this.myColor === 'black') {
+                document.querySelector('.game-container').classList.add('perspective-black');
+            } else {
+                document.querySelector('.game-container').classList.remove('perspective-black');
+            }
+
             // Fix Timer Visibility for Online
             document.getElementById('white-timer').classList.remove('hidden');
             document.getElementById('black-timer').classList.remove('hidden');
