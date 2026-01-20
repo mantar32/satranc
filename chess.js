@@ -814,6 +814,12 @@ class ChessGame {
         document.getElementById('game-end-message').textContent = message;
         document.getElementById('game-end-modal').classList.remove('hidden');
         this.gameActive = false;
+
+        // Play game end sound
+        if (window.soundManager) {
+            const isWin = message.toLowerCase().includes('kazandı') || message.toLowerCase().includes('tebrik');
+            window.soundManager.playGameEnd(isWin);
+        }
     }
 
     resetGameState() {
@@ -1076,6 +1082,23 @@ class ChessGame {
         this.currentPlayer = this.currentPlayer === 'white' ? 'black' : 'white';
         this.renderBoard();
         this.updateTurnIndicators();
+
+        // Play sound effects
+        if (window.soundManager) {
+            if (moveData.castling) {
+                window.soundManager.playCastle();
+            } else if (captured || moveData.enPassant) {
+                window.soundManager.playCapture();
+            } else {
+                window.soundManager.playMove();
+            }
+            // Check sound (after a short delay)
+            setTimeout(() => {
+                if (this.isKingInCheck(this.currentPlayer)) {
+                    window.soundManager.playCheck();
+                }
+            }, 100);
+        }
 
         // Switch Chess Clock
         if (this.gameMode === 'online') {
