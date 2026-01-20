@@ -220,9 +220,17 @@ class ChessGame {
                 // Register player for lobby system
                 this.socket.emit('register_player', this.username);
 
+                // ALWAYS enter game screen when joining a room
+                this.startGame('online');
+
                 if (waiting) {
-                    // Show waiting state on that room card
-                    this.renderPublicRooms(null, roomId); // Will re-render with waiting state
+                    // Show waiting message in game status
+                    const statusEl = document.getElementById('game-status');
+                    if (statusEl) statusEl.innerHTML = `
+                        <div class="waiting-message">
+                            <span class="pulse">●</span> Rakip bekleniyor...
+                        </div>
+                    `;
 
                     // Show invite button while waiting
                     document.getElementById('invite-player-btn')?.classList.remove('hidden');
