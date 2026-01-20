@@ -56,14 +56,6 @@
                             <span class="mode-desc">Açık odalara katıl</span>
                         </div>
                     </button>
-
-                    <button class="mode-btn" id="players-lobby-btn">
-                        <div class="mode-icon">👥</div>
-                        <div class="mode-info">
-                            <span class="mode-title">Online Oyuncular</span>
-                            <span class="mode-desc">Rakip davet et</span>
-                        </div>
-                    </button>
                 </div>
 
                 <div class="online-lobby hidden" id="online-lobby">
@@ -109,22 +101,6 @@
                         <!-- Rooms will be rendered by JS -->
                     </div>
                     <button class="back-btn" id="back-to-modes-public" style="margin-top: 20px;">
-                        <span>← Geri</span>
-                    </button>
-                </div>
-
-                <!-- Players Lobby -->
-                <div class="players-lobby hidden" id="players-lobby">
-                    <h2>👥 Online Oyuncular</h2>
-                    <div class="my-username-display">
-                        <span>Kullanıcı Adınız:</span>
-                        <strong id="my-username-label">Yükleniyor...</strong>
-                    </div>
-                    <p style="color: var(--text-muted); margin-bottom: 15px;">Bir oyuncuya tıklayarak davet gönderin</p>
-                    <div class="online-players-list" id="online-players-list">
-                        <!-- Players will be rendered by JS -->
-                    </div>
-                    <button class="back-btn" id="back-to-modes-players" style="margin-top: 20px;">
                         <span>← Geri</span>
                     </button>
                 </div>
@@ -215,6 +191,9 @@
                 <button class="control-btn hidden mic-btn" id="mic-btn" title="Sesli Sohbet">
                     <span class="btn-icon">🎤</span>
                 </button>
+                <button class="control-btn hidden invite-player-btn" id="invite-player-btn" title="Oyuncu Davet Et">
+                    <span class="btn-icon">👥</span>
+                </button>
 
             </div>
 
@@ -262,6 +241,19 @@
             <div class="invite-buttons">
                 <button class="invite-btn accept" id="accept-invite-btn">✓ Kabul Et</button>
                 <button class="invite-btn reject" id="reject-invite-btn">✗ Reddet</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Players List Modal (for in-game invitations) -->
+    <div class="players-modal hidden" id="players-modal">
+        <div class="players-modal-content">
+            <div class="players-modal-header">
+                <h3>👥 Online Oyuncular</h3>
+                <button class="close-modal-btn" id="close-players-modal">✕</button>
+            </div>
+            <div class="online-players-list" id="online-players-list">
+                <!-- Players will be rendered by JS -->
             </div>
         </div>
     </div>

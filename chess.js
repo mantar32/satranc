@@ -216,9 +216,16 @@ class ChessGame {
                 this.roomId = roomId;
                 this.myColor = color;
                 this.gameMode = 'online';
+
+                // Register player for lobby system
+                this.socket.emit('register_player', this.username);
+
                 if (waiting) {
                     // Show waiting state on that room card
                     this.renderPublicRooms(null, roomId); // Will re-render with waiting state
+
+                    // Show invite button while waiting
+                    document.getElementById('invite-player-btn')?.classList.remove('hidden');
                 }
             });
 
@@ -324,21 +331,18 @@ class ChessGame {
             this.showModeSelection();
         });
 
-        // Players Lobby Button
-        document.getElementById('players-lobby-btn').addEventListener('click', () => {
-            document.querySelector('.mode-selection').classList.add('hidden');
-            document.getElementById('players-lobby').classList.remove('hidden');
-            document.getElementById('my-username-label').textContent = this.username;
-            this.socket.emit('register_player', this.username);
+        // Invite Player Button (in-game)
+        document.getElementById('invite-player-btn')?.addEventListener('click', () => {
             this.socket.emit('get_online_players');
+            document.getElementById('players-modal').classList.remove('hidden');
         });
 
-        // Back from Players Lobby
-        document.getElementById('back-to-modes-players').addEventListener('click', () => {
-            this.showModeSelection();
+        // Close Players Modal
+        document.getElementById('close-players-modal')?.addEventListener('click', () => {
+            document.getElementById('players-modal').classList.add('hidden');
         });
 
-        // Invite Modal Buttons
+        // Invite Modal Buttons (incoming invite)
         document.getElementById('accept-invite-btn').addEventListener('click', () => {
             if (this.pendingInviteFrom) {
                 this.socket.emit('invite_response', { fromId: this.pendingInviteFrom, accepted: true });
@@ -717,7 +721,7 @@ class ChessGame {
         document.getElementById('difficulty-selection').classList.add('hidden');
         document.getElementById('online-lobby').classList.add('hidden');
         document.getElementById('public-lobby').classList.add('hidden');
-        document.getElementById('players-lobby').classList.add('hidden');
+        document.getElementById('players-modal')?.classList.add('hidden');
     }
 
     startGame(mode, difficulty = 1) {
@@ -947,6 +951,10 @@ class ChessGame {
 
         // Reset perspective
         document.querySelector('.game-container').classList.remove('perspective-black');
+
+        // Hide invite button and modal
+        document.getElementById('invite-player-btn')?.classList.add('hidden');
+        document.getElementById('players-modal')?.classList.add('hidden');
 
         document.getElementById('game-screen').classList.add('hidden');
         document.getElementById('start-menu').classList.remove('hidden');
