@@ -768,101 +768,98 @@ class ChessGame {
     startGame(mode, difficulty = 1) {
         this.gameMode = mode;
         this.difficulty = difficulty;
+
+        // Reset Game State Basics
+        this.gameActive = true;
+        this.currentPlayer = 'white';
+        this.selectedPiece = null;
+        this.legalMoves = [];
+        this.isGameOver = false;
+        this.castlingRights = { white: { kingSide: true, queenSide: true }, black: { kingSide: true, queenSide: true } };
+        this.enPassantTarget = null;
+        this.history = [];
+        this.halfMoveClock = 0;
+        this.moveNumber = 1;
+
+        // Initialize Time Defaults if missing (safe fallback)
+        if (!this.timeRemaining) {
+            this.timeRemaining = { white: 600, black: 600 }; // 10 min default
+        }
+
+        // UI Updates
         document.getElementById('start-menu').classList.add('hidden');
         document.getElementById('game-screen').classList.remove('hidden');
 
-        document.getElementById('start-menu').classList.add('hidden');
-        document.getElementById('game-screen').classList.remove('hidden');
-
-        // Hide online-only buttons by default (reset state)
+        // Hide online-only buttons by default
         document.getElementById('cheat-btn').classList.add('hidden');
         document.getElementById('tea-btn').classList.add('hidden');
         document.getElementById('mic-btn').classList.add('hidden');
         document.getElementById('invite-player-btn')?.classList.add('hidden');
         document.getElementById('my-username-badge')?.classList.add('hidden');
 
-        // Hide restart button for online/public lobby games, show mic button
+        // Mode specific setup
         if (mode === 'online') {
             document.getElementById('new-game').classList.add('hidden');
-            document.getElementById('mic-btn').classList.remove('hidden'); // Show mic in online
-            document.getElementById('invite-player-btn')?.classList.remove('hidden'); // Show invite btn
+            document.getElementById('mic-btn').classList.remove('hidden');
+            document.getElementById('invite-player-btn')?.classList.remove('hidden');
 
-            // Show username badge
             const usernameBadge = document.getElementById('my-username-badge');
             const usernameLabel = document.getElementById('game-username-label');
             if (usernameBadge && usernameLabel && this.username) {
                 usernameLabel.textContent = this.username;
                 usernameBadge.classList.remove('hidden');
             }
-        } else {
-            document.getElementById('new-game').classList.remove('hidden');
-        }
 
-        const diffNames = ['', 'Çok Kolay', 'Kolay', 'Orta', 'Zor', 'Çok Zor'];
-        document.getElementById('game-mode-label').textContent = mode === 'two-player' ? '2 Kişilik Mod' : `Bilgisayar (${diffNames[difficulty]})`;
-        document.getElementById('white-name').textContent = 'Siz';
-        if (mode === 'two-player') {
-            document.getElementById('black-name').textContent = 'Rakip';
-            this.myColor = null; // Local multiplayer
-            document.querySelector('.game-container').classList.remove('perspective-black');
-        } else if (mode === 'vs-computer') {
-            document.getElementById('black-name').textContent = 'Bilgisayar';
-            this.myColor = 'white';
-            document.querySelector('.game-container').classList.remove('perspective-black');
-        } else if (mode === 'online') {
-            document.getElementById('game-mode-label').textContent = `Online Oda: ${this.roomId}`;
+            document.getElementById('game-mode-label').textContent = this.roomId ? `Online Oda: ${this.roomId}` : 'Online Oyun';
             document.getElementById('white-name').textContent = this.myColor === 'white' ? 'Siz' : 'Rakip';
             document.getElementById('black-name').textContent = this.myColor === 'black' ? 'Siz' : 'Rakip';
 
-            // Toggle perspective class for flipping panels via CSS
-            document.getElementById('game-mode-label').textContent = 'Online Çok Oyunculu';
-            document.getElementById('tea-btn').classList.remove('hidden');
-
-            if (this.myColor === 'black') {
-                document.querySelector('.game-container').classList.add('perspective-black');
-            } else {
-                document.querySelector('.game-container').classList.remove('perspective-black');
-            }
-
-            // Cheat Button is explicitly HIDDEN by default for everyone.
-            // Only voice command "şafak" can reveal it.
-            document.getElementById('cheat-btn').classList.add('hidden');
-
-            /* REMOVED: Old Creator Check
-            if (this.myColor === 'white') {
-                document.getElementById('cheat-btn').classList.remove('hidden');
-            } else {
-                document.getElementById('cheat-btn').classList.add('hidden');
-            }
-            */
-
-            // Init Chess Clock
+            // Fix Timer Visibility for Online
             document.getElementById('white-timer').classList.remove('hidden');
             document.getElementById('black-timer').classList.remove('hidden');
 
-            if (this.timeRemaining.white === 0) {
-                // Unlimited Time Mode
-                document.getElementById('white-timer').textContent = "∞";
-                document.getElementById('black-timer').textContent = "∞";
-                // Do NOT start clock
-            } else {
-                // Standard Timer Mode
-                const startMinutes = Math.floor(this.timeRemaining.white / 60).toString().padStart(2, '0');
-                document.getElementById('white-timer').textContent = `${startMinutes}:00`;
-                document.getElementById('black-timer').textContent = `${startMinutes}:00`;
-                // Start clock for White immediately
-                this.startClock('white');
-            }
         } else {
-            // Hide online-only buttons
-            // document.getElementById('tea-btn').classList.add('hidden'); // Already hidden by default
-            // document.getElementById('cheat-btn').classList.add('hidden'); // Already hidden by default
+            document.getElementById('new-game').classList.remove('hidden');
+            const diffNames = ['', 'Çok Kolay', 'Kolay', 'Orta', 'Zor', 'Çok Zor'];
+            document.getElementById('game-mode-label').textContent = mode === 'two-player' ? '2 Kişilik Mod' : `Bilgisayar (${diffNames[difficulty]})`;
+            document.getElementById('white-name').textContent = 'Siz';
+
+            if (mode === 'two-player') {
+                document.getElementById('black-name').textContent = 'Rakip';
+                this.myColor = null;
+                document.querySelector('.game-container').classList.remove('perspective-black');
+            } else if (mode === 'vs-computer') {
+                document.getElementById('black-name').textContent = 'Bilgisayar';
+                this.myColor = 'white';
+                document.querySelector('.game-container').classList.remove('perspective-black');
+            }
         }
+
+        // Initialize Board - CRITICAL: Must happen for ALL modes
         this.createBoard();
         this.setupPieces();
         this.renderBoard();
+
+        // Setup Event Listeners (ensure buttons work)
         this.setupEventListeners();
+
+        // Re-bind Exit Button Explicitly (Fix for "inactive button" issue)
+        const mainMenuBtn = document.getElementById('main-menu');
+        if (mainMenuBtn) {
+            mainMenuBtn.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.goToMainMenu();
+            };
+        }
+
         this.updateTurnIndicators();
+
+        // Initialize Timers Display
+        if (this.timeRemaining) {
+            this.updateClockDisplay('white');
+            this.updateClockDisplay('black');
+        }
     }
 
     startClock(color) {
