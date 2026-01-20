@@ -705,15 +705,16 @@ class ChessGame {
             // Create peer connection if not exists
             if (!this.peerConnection) this.createPeerConnection();
 
-            // Add audio tracks
-            this.localStream.getTracks().forEach(track => {
-                this.peerConnection.addTrack(track, this.localStream);
-            });
+            // Add audio tracks ONLY if strictly needed (if not added by createPeerConnection)
+            // But createPeerConnection already adds them if logic is correct.
+            // Start renegotiation or initial offer
 
             // Create and send offer
             const offer = await this.peerConnection.createOffer();
             await this.peerConnection.setLocalDescription(offer);
             this.socket.emit('voice_offer', { roomId: this.roomId, offer });
+
+
 
             // Update UI
             micBtn.classList.remove('connecting');
