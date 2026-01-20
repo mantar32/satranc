@@ -384,7 +384,7 @@ class ChessGame {
         }
     }
 
-    async toggleMicrophone() {
+    async toggleMicrophone(isRetry = false) {
         const micBtn = document.getElementById('mic-btn');
 
         if (this.isMicOn) {
@@ -398,9 +398,32 @@ class ChessGame {
         // Connecting state
         micBtn.classList.add('connecting');
 
+        // Detect Android
+        const isAndroid = /Android/i.test(navigator.userAgent);
+
+        // Audio constraints - use simpler settings for Android
+        const audioConstraints = isAndroid ? {
+            audio: {
+                echoCancellation: true,
+                noiseSuppression: true,
+                autoGainControl: true,
+                sampleRate: 16000, // Lower sample rate for Android
+                channelCount: 1
+            },
+            video: false
+        } : {
+            audio: true,
+            video: false
+        };
+
         try {
+            // Check if getUserMedia is supported
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                throw new Error('NOT_SUPPORTED');
+            }
+
             // Get microphone access
-            this.localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+            this.localStream = await navigator.mediaDevices.getUserMedia(audioConstraints);
 
             // Create peer connection if not exists
             if (!this.peerConnection) this.createPeerConnection();
@@ -421,9 +444,48 @@ class ChessGame {
             this.isMicOn = true;
 
         } catch (error) {
-            console.error('Mikrofon erişimi reddedildi:', error);
-            alert('Mikrofon erişimi reddedildi. Lütfen tarayıcı ayarlarından izin verin.');
+            console.error('Mikrofon hatası:', error);
             micBtn.classList.remove('connecting');
+
+            let errorMessage = '';
+            let showRetry = false;
+
+            if (error.message === 'NOT_SUPPORTED') {
+                errorMessage = '❌ Bu tarayıcı mikrofon özelliğini desteklemiyor.\n\n' +
+                    '📱 Android: Chrome veya Firefox kullanın.\n' +
+                    '🍎 iOS: Safari kullanın.';
+            } else if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+                errorMessage = '🔒 Mikrofon izni reddedildi.\n\n' +
+                    '📱 Android için:\n' +
+                    '1. Tarayıcı ayarlarına gidin\n' +
+                    '2. Site Ayarları > Mikrofon\n' +
+                    '3. Bu siteye izin verin\n\n' +
+                    '🍎 iOS için:\n' +
+                    '1. Ayarlar > Safari > Mikrofon\n' +
+                    '2. İzin verin';
+                showRetry = true;
+            } else if (error.name === 'NotFoundError') {
+                errorMessage = '🎤 Mikrofon bulunamadı.\n\nCihazınızda mikrofon olduğundan emin olun.';
+            } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
+                errorMessage = '⚠️ Mikrofon başka bir uygulama tarafından kullanılıyor.\n\n' +
+                    'Diğer uygulamaları kapatıp tekrar deneyin.';
+                showRetry = true;
+            } else {
+                errorMessage = '❌ Mikrofon açılamadı.\n\n' +
+                    'Hata: ' + (error.message || error.name || 'Bilinmeyen hata') + '\n\n' +
+                    'Tekrar denemek için "Tamam"a tıklayın.';
+                showRetry = true;
+            }
+
+            if (showRetry && !isRetry) {
+                const retry = confirm(errorMessage + '\n\nTekrar denemek ister misiniz?');
+                if (retry) {
+                    // Wait a moment and retry
+                    setTimeout(() => this.toggleMicrophone(true), 500);
+                }
+            } else {
+                alert(errorMessage);
+            }
         }
     }
 
