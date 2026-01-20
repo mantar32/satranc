@@ -110,6 +110,14 @@ class ChessGame {
 
             console.log('Connecting to socket at:', socketUrl);
 
+            this.socket.on('connect', () => {
+                console.log('Connected to server');
+                // Register if username exists
+                if (this.username) {
+                    this.socket.emit('register_player', this.username);
+                }
+            });
+
             this.socket.on('room_created', (data) => {
                 this.roomId = data.roomId;
                 this.myColor = data.color;
@@ -451,6 +459,9 @@ class ChessGame {
             this.showUsernameModal();
         } else {
             this.username = savedUsername;
+            if (this.socket && this.socket.connected) {
+                this.socket.emit('register_player', this.username);
+            }
         }
     }
 
@@ -471,6 +482,11 @@ class ChessGame {
                 this.username = name;
                 localStorage.setItem('chessUsername', name);
                 modal.classList.add('hidden');
+
+                // Register immediately upon saving
+                if (this.socket && this.socket.connected) {
+                    this.socket.emit('register_player', this.username);
+                }
             } else {
                 alert('Kullanıcı adı en az 3 karakter olmalı!');
             }
