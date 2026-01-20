@@ -198,6 +198,9 @@
             </div>
 
             <div class="game-status" id="game-status"></div>
+            <div class="my-username-badge hidden" id="my-username-badge">
+                👤 <span id="game-username-label"></span>
+            </div>
         </div>
 
         <!-- Modal for game end -->
@@ -230,6 +233,16 @@
     <div id="tea-animation" class="tea-animation hidden">
         <div class="tea-icon">☕</div>
         <div class="tea-text">Afiyet Olsun!</div>
+    </div>
+
+    <!-- Username Setup Modal -->
+    <div class="username-modal hidden" id="username-modal">
+        <div class="username-modal-content">
+            <div class="username-icon">👤</div>
+            <h3>Kullanıcı Adınızı Belirleyin</h3>
+            <input type="text" id="username-input" placeholder="Kullanıcı adı..." maxlength="15" />
+            <button class="username-save-btn" id="save-username-btn">Kaydet</button>
+        </div>
     </div>
 
     <!-- Invite Modal -->

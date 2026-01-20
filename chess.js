@@ -401,10 +401,39 @@ class ChessGame {
         // Check if username exists in localStorage
         let savedUsername = localStorage.getItem('chessUsername');
         if (!savedUsername) {
-            savedUsername = this.generateUsername();
-            localStorage.setItem('chessUsername', savedUsername);
+            // Show username modal on first visit
+            this.showUsernameModal();
+        } else {
+            this.username = savedUsername;
         }
-        this.username = savedUsername;
+    }
+
+    showUsernameModal() {
+        const modal = document.getElementById('username-modal');
+        const input = document.getElementById('username-input');
+        const saveBtn = document.getElementById('save-username-btn');
+
+        // Pre-fill with a random suggestion
+        input.value = this.generateUsername();
+        modal.classList.remove('hidden');
+        input.focus();
+        input.select();
+
+        saveBtn.onclick = () => {
+            const name = input.value.trim();
+            if (name.length >= 3) {
+                this.username = name;
+                localStorage.setItem('chessUsername', name);
+                modal.classList.add('hidden');
+            } else {
+                alert('Kullanıcı adı en az 3 karakter olmalı!');
+            }
+        };
+
+        // Enter key support
+        input.onkeypress = (e) => {
+            if (e.key === 'Enter') saveBtn.click();
+        };
     }
 
     generateUsername() {
@@ -433,10 +462,13 @@ class ChessGame {
             item.className = 'player-item';
 
             const statusText = {
-                'available': 'Müsait',
+                'available': 'Lobide',
                 'in_game': 'Oyunda',
                 'invited': 'Davetli'
             };
+
+            const buttonText = player.status === 'available' ? 'Davet Et' :
+                player.status === 'in_game' ? 'Oyunda' : 'Bekliyor';
 
             item.innerHTML = `
                 <div class="player-info">
@@ -444,7 +476,7 @@ class ChessGame {
                     <span class="player-status ${player.status}">${statusText[player.status] || player.status}</span>
                 </div>
                 <button class="invite-btn" ${player.status !== 'available' ? 'disabled' : ''}>
-                    ${player.status === 'available' ? 'Davet Et' : 'Müsait Değil'}
+                    ${buttonText}
                 </button>
             `;
 
@@ -452,6 +484,7 @@ class ChessGame {
             if (player.status === 'available') {
                 inviteBtn.addEventListener('click', () => {
                     this.socket.emit('send_invite', { targetId: player.id });
+                    document.getElementById('players-modal')?.classList.add('hidden');
                 });
             }
 
@@ -737,11 +770,22 @@ class ChessGame {
         document.getElementById('cheat-btn').classList.add('hidden');
         document.getElementById('tea-btn').classList.add('hidden');
         document.getElementById('mic-btn').classList.add('hidden');
+        document.getElementById('invite-player-btn')?.classList.add('hidden');
+        document.getElementById('my-username-badge')?.classList.add('hidden');
 
         // Hide restart button for online/public lobby games, show mic button
         if (mode === 'online') {
             document.getElementById('new-game').classList.add('hidden');
             document.getElementById('mic-btn').classList.remove('hidden'); // Show mic in online
+            document.getElementById('invite-player-btn')?.classList.remove('hidden'); // Show invite btn
+
+            // Show username badge
+            const usernameBadge = document.getElementById('my-username-badge');
+            const usernameLabel = document.getElementById('game-username-label');
+            if (usernameBadge && usernameLabel && this.username) {
+                usernameLabel.textContent = this.username;
+                usernameBadge.classList.remove('hidden');
+            }
         } else {
             document.getElementById('new-game').classList.remove('hidden');
         }
