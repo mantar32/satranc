@@ -95,14 +95,30 @@
 
                 <!-- Public Lobby -->
                 <div class="public-lobby hidden" id="public-lobby">
-                    <h2>🏠 Herkese Açık Lobi</h2>
-                    <p style="color: var(--text-muted); margin-bottom: 15px;">Bir odaya katılarak oyna</p>
-                    <div class="public-rooms-grid" id="public-rooms-grid">
-                        <!-- Rooms will be rendered by JS -->
+                    <div class="lobby-header-row">
+                        <h2>🏠 Herkese Açık Lobi</h2>
+                        <button class="icon-btn-small" id="back-to-modes-public" title="Geri">
+                            <span>↩</span>
+                        </button>
                     </div>
-                    <button class="back-btn" id="back-to-modes-public" style="margin-top: 20px;">
-                        <span>← Geri</span>
-                    </button>
+
+                    <div class="lobby-split-container">
+                        <!-- Left: Rooms -->
+                        <div class="lobby-column rooms-column">
+                            <h3>Açık Odalar</h3>
+                            <div class="public-rooms-grid" id="public-rooms-grid">
+                                <!-- Rooms will be rendered by JS -->
+                            </div>
+                        </div>
+
+                        <!-- Right: Players -->
+                        <div class="lobby-column players-column">
+                            <h3>Online Oyuncular <span id="lobby-online-count" class="count-badge">0</span></h3>
+                            <div class="lobby-players-list" id="lobby-players-list">
+                                <div class="empty-list-msg">Kimse yok...</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="difficulty-selection hidden" id="difficulty-selection">

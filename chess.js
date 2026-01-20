@@ -506,52 +506,86 @@ class ChessGame {
     }
 
     renderOnlinePlayers(players) {
-        const list = document.getElementById('online-players-list');
-        if (!list) return;
+        const modalList = document.getElementById('online-players-list');
+        const lobbyList = document.getElementById('lobby-players-list');
+        const lobbyCount = document.getElementById('lobby-online-count');
 
-        list.innerHTML = '';
-
-        // Filter out self and sort by status
+        // Filter out self
         const otherPlayers = players.filter(p => p.id !== this.socket?.id);
 
-        if (otherPlayers.length === 0) {
-            list.innerHTML = '<div class="no-players-message">Şu an başka online oyuncu yok. Lütfen bekleyin...</div>';
-            return;
-        }
+        // Update count badge
+        if (lobbyCount) lobbyCount.textContent = otherPlayers.length;
 
-        otherPlayers.forEach(player => {
-            const item = document.createElement('div');
-            item.className = 'player-item';
+        // Function to render items into a container
+        const renderToContainer = (container, isLobbyView) => {
+            if (!container) return;
+            container.innerHTML = '';
 
-            const statusText = {
-                'available': 'Lobide',
-                'in_game': 'Oyunda',
-                'invited': 'Davetli'
-            };
-
-            const buttonText = player.status === 'available' ? 'Davet Et' :
-                player.status === 'in_game' ? 'Oyunda' : 'Bekliyor';
-
-            item.innerHTML = `
-                <div class="player-info">
-                    <span class="player-name">${player.username}</span>
-                    <span class="player-status ${player.status}">${statusText[player.status] || player.status}</span>
-                </div>
-                <button class="invite-btn" ${player.status !== 'available' ? 'disabled' : ''}>
-                    ${buttonText}
-                </button>
-            `;
-
-            const inviteBtn = item.querySelector('.invite-btn');
-            if (player.status === 'available') {
-                inviteBtn.addEventListener('click', () => {
-                    this.socket.emit('send_invite', { targetId: player.id });
-                    document.getElementById('players-modal')?.classList.add('hidden');
-                });
+            if (otherPlayers.length === 0) {
+                container.innerHTML = '<div class="' + (isLobbyView ? 'empty-list-msg' : 'no-players-message') + '">Şu an başka online oyuncu yok.</div>';
+                return;
             }
 
-            list.appendChild(item);
-        });
+            otherPlayers.forEach(player => {
+                const item = document.createElement('div');
+                item.className = isLobbyView ? 'lobby-player-item' : 'player-item';
+
+                const statusText = {
+                    'available': 'Lobide',
+                    'in_game': 'Oyunda',
+                    'invited': 'Davetli'
+                };
+
+                const buttonText = player.status === 'available' ? 'Davet Et' :
+                    player.status === 'in_game' ? 'Oyunda' : 'Bekliyor';
+
+                if (isLobbyView) {
+                    // Lobby View embedded style
+                    item.innerHTML = `
+                        <div class="name-group">
+                            <span class="p-name">${player.username}</span>
+                            <span class="p-status ${player.status}">${statusText[player.status] || player.status}</span>
+                        </div>
+                        <button class="invite-btn" ${player.status !== 'available' ? 'disabled' : ''}>
+                           ${player.status === 'available' ? 'Davet' : '⚔️'}
+                        </button>
+                    `;
+                } else {
+                    // Modal View existing style
+                    item.innerHTML = `
+                        <div class="player-info">
+                            <span class="player-name">${player.username}</span>
+                            <span class="player-status ${player.status}">${statusText[player.status] || player.status}</span>
+                        </div>
+                        <button class="invite-btn" ${player.status !== 'available' ? 'disabled' : ''}>
+                            ${buttonText}
+                        </button>
+                    `;
+                }
+
+                const inviteBtn = item.querySelector('.invite-btn');
+
+                if (player.status === 'available') {
+                    inviteBtn.addEventListener('click', () => {
+                        this.socket.emit('send_invite', { targetId: player.id });
+                        document.getElementById('players-modal')?.classList.add('hidden'); // Close modal if open
+
+                        // Visual feedback
+                        inviteBtn.textContent = 'Gönderildi...';
+                        inviteBtn.disabled = true;
+                    });
+                } else {
+                    inviteBtn.style.opacity = '0.5';
+                    inviteBtn.style.cursor = 'not-allowed';
+                }
+
+                container.appendChild(item);
+            });
+        };
+
+        // Render both
+        renderToContainer(modalList, false);
+        renderToContainer(lobbyList, true);
     }
 
     showInviteModal(fromUsername) {
