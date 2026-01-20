@@ -627,9 +627,27 @@ class ChessGame {
 
         // Handle incoming audio stream
         this.peerConnection.ontrack = (event) => {
+            console.log('Voice track received');
             const remoteAudio = document.getElementById('remote-audio') || this.createRemoteAudio();
-            remoteAudio.srcObject = event.streams[0];
-            this.showAudioIndicator(true);
+
+            if (event.streams && event.streams[0]) {
+                remoteAudio.srcObject = event.streams[0];
+            } else {
+                // Fallback for some browsers/mobile that don't send streams array in ontrack
+                let inboundStream = new MediaStream();
+                inboundStream.addTrack(event.track);
+                remoteAudio.srcObject = inboundStream;
+            }
+
+            // Ensure playback starts (Mobile Safari/Chrome policy fix)
+            remoteAudio.play().then(() => {
+                console.log('Remote audio playing');
+                this.showAudioIndicator(true);
+            }).catch(e => {
+                console.error('Audio playback failed (Autoplay policy?):', e);
+                // Maybe show a "Click to hear" button if autoplay fails
+                this.showAudioIndicator(true, true); // true, true = error state
+            });
         };
 
         // Add local audio track if available
@@ -644,18 +662,40 @@ class ChessGame {
         const audio = document.createElement('audio');
         audio.id = 'remote-audio';
         audio.autoplay = true;
+        audio.playsInline = true; // Crucial for iOS
+        // audio.controls = true; // Debugging: Uncomment to see controls
         document.body.appendChild(audio);
         return audio;
     }
 
-    showAudioIndicator(show) {
+    showAudioIndicator(show, isError = false) {
         let indicator = document.getElementById('audio-indicator');
-        if (show && !indicator) {
-            indicator = document.createElement('div');
-            indicator.id = 'audio-indicator';
-            indicator.className = 'audio-indicator';
-            indicator.innerHTML = '<span class="icon">🔊</span> Sesli bağlantı aktif';
-            document.body.appendChild(indicator);
+        if (show) {
+            if (!indicator) {
+                indicator = document.createElement('div');
+                indicator.id = 'audio-indicator';
+                indicator.className = 'audio-indicator';
+                document.body.appendChild(indicator);
+            }
+
+            if (isError) {
+                indicator.innerHTML = '<span class="icon">🔇</span> Ses kapalı (Dinlemek için tıkla)';
+                indicator.classList.add('audio-error');
+                indicator.style.cursor = 'pointer';
+                indicator.onclick = () => {
+                    const audio = document.getElementById('remote-audio');
+                    if (audio) {
+                        audio.play().then(() => {
+                            this.showAudioIndicator(true, false);
+                        }).catch(e => alert("Ses çalınamıyor: " + e.message));
+                    }
+                };
+            } else {
+                indicator.innerHTML = '<span class="icon">🔊</span> Sesli bağlantı aktif';
+                indicator.classList.remove('audio-error');
+                indicator.style.cursor = 'default';
+                indicator.onclick = null;
+            }
         } else if (!show && indicator) {
             indicator.remove();
         }
