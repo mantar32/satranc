@@ -243,12 +243,7 @@ class ChessGame {
             });
 
             this.socket.on('game_start', (data) => {
-                this.gameActive = true;
                 this.timeRemaining = { white: 0, black: 0 }; // Unlimited time
-
-                // Update UI
-                document.getElementById('game-status').textContent = "Oyun Başladı!";
-                document.getElementById('game-status').className = 'game-status';
 
                 if (data.white === this.socket.id) this.myColor = 'white';
                 if (data.black === this.socket.id) this.myColor = 'black';
@@ -258,6 +253,26 @@ class ChessGame {
 
                 this.updateClockDisplay('white');
                 this.updateClockDisplay('black');
+
+                // Countdown Animation
+                let count = 3;
+                const statusEl = document.getElementById('game-status');
+
+                if (statusEl) {
+                    statusEl.innerHTML = `<div class="countdown-msg">Oyun Başlıyor... ${count}</div>`;
+                    statusEl.className = 'game-status';
+                }
+
+                const timer = setInterval(() => {
+                    count--;
+                    if (count > 0) {
+                        if (statusEl) statusEl.innerHTML = `<div class="countdown-msg">Oyun Başlıyor... ${count}</div>`;
+                    } else {
+                        clearInterval(timer);
+                        if (statusEl) statusEl.textContent = "Oyun Başladı! Başarılar.";
+                        this.gameActive = true; // Unlock game ONLY after countdown
+                    }
+                }, 1000);
             });
 
             // === VOICE CHAT SOCKET LISTENERS ===
@@ -793,7 +808,8 @@ class ChessGame {
         this.difficulty = difficulty;
 
         // Reset Game State Basics
-        this.gameActive = true;
+        // Reset Game State Basics
+        this.gameActive = mode !== 'online'; // Online starts paused until 'game_start'
         this.currentPlayer = 'white';
         this.selectedPiece = null;
         this.legalMoves = [];
@@ -804,9 +820,11 @@ class ChessGame {
         this.halfMoveClock = 0;
         this.moveNumber = 1;
 
-        // Initialize Time Defaults if missing (safe fallback)
-        if (!this.timeRemaining) {
-            this.timeRemaining = { white: 600, black: 600 }; // 10 min default
+        // Initialize Time Defaults
+        if (mode === 'online') {
+            this.timeRemaining = { white: 0, black: 0 }; // Unlimited time for online
+        } else {
+            this.timeRemaining = { white: 600, black: 600 }; // 10 min for others
         }
 
         // UI Updates
@@ -1063,6 +1081,9 @@ class ChessGame {
     }
 
     handleSquareClick(e) {
+        // STRICT GAME ACTIVE CHECK
+        if (!this.gameActive) return;
+
         if (this.isGameOver || this.isAIThinking) return;
         if (this.gameMode === 'vs-computer' && this.currentPlayer === 'black') return;
 
