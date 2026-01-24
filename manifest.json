@@ -1,5 +1,6 @@
 {
     "name": "Satranç Oyunu",
+    "id": "/",
     "short_name": "Satranç",
     "description": "Modern ve şık tasarımlı web tabanlı satranç oyunu. 2 kişilik, bilgisayara karşı ve online modları ile oynayın.",
     "start_url": "/",
