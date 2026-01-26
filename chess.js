@@ -1797,15 +1797,51 @@ class ChessGame {
     }
 
     hasAnyValidMoves(color) {
+        // Optimize: Tüm hamleleri hesaplamadan erken çıkış yap
         for (let r = 0; r < 8; r++) {
             for (let c = 0; c < 8; c++) {
                 const piece = this.board[r][c];
                 if (piece && piece.color === color) {
-                    if (this.getValidMoves(r, c).length > 0) return true;
+                    // getValidMoves yerine daha hızlı kontrol
+                    const moves = this.getValidMovesQuick(r, c, piece);
+                    if (moves.length > 0) return true;
                 }
             }
         }
         return false;
+    }
+
+    // Hızlı hamle kontrolü - sadece bir geçerli hamle olup olmadığını kontrol eder
+    getValidMovesQuick(row, col, piece) {
+        let moves = [];
+        switch (piece.type) {
+            case 'pawn': moves = this.getPawnMoves(row, col, piece.color); break;
+            case 'rook': moves = this.getRookMoves(row, col, piece.color); break;
+            case 'knight': moves = this.getKnightMoves(row, col, piece.color); break;
+            case 'bishop': moves = this.getBishopMoves(row, col, piece.color); break;
+            case 'queen': moves = this.getQueenMoves(row, col, piece.color); break;
+            case 'king': moves = this.getKingMovesBasic(row, col, piece.color); break; // Rok hariç
+        }
+        // İlk geçerli hamleyi bul ve çık
+        for (const move of moves) {
+            if (!this.wouldBeInCheck(row, col, move.row, move.col, piece.color)) {
+                return [move]; // Bir tane yeterli
+            }
+        }
+        return [];
+    }
+
+    // Basit kral hamleleri (rok kontrolü olmadan - daha hızlı)
+    getKingMovesBasic(row, col, color) {
+        const moves = [];
+        [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]].forEach(([dr, dc]) => {
+            const r = row + dr, c = col + dc;
+            if (this.isValidSquare(r, c)) {
+                const target = this.board[r][c];
+                if (!target || target.color !== color) moves.push({ row: r, col: c });
+            }
+        });
+        return moves;
     }
 
     isCheckmate(color) {
