@@ -1234,14 +1234,31 @@ class ChessGame {
     }
 
     handleSquareClick(e) {
-        // STRICT GAME ACTIVE CHECK
-        if (!this.gameActive) return;
+        // Debug: Tıklama durumunu logla
+        console.log('Click detected. gameActive:', this.gameActive, 'isGameOver:', this.isGameOver,
+            'isAIThinking:', this.isAIThinking, 'currentPlayer:', this.currentPlayer,
+            'myColor:', this.myColor, 'gameMode:', this.gameMode);
 
-        if (this.isGameOver || this.isAIThinking) return;
-        if (this.gameMode === 'vs-computer' && this.currentPlayer === 'black') return;
+        // STRICT GAME ACTIVE CHECK
+        if (!this.gameActive) {
+            console.log('Click blocked: gameActive is false');
+            return;
+        }
+
+        if (this.isGameOver || this.isAIThinking) {
+            console.log('Click blocked: isGameOver or isAIThinking');
+            return;
+        }
+        if (this.gameMode === 'vs-computer' && this.currentPlayer === 'black') {
+            console.log('Click blocked: vs-computer mode and black turn');
+            return;
+        }
 
         // Online check: can only move my own pieces
-        if (this.gameMode === 'online' && this.currentPlayer !== this.myColor) return;
+        if (this.gameMode === 'online' && this.currentPlayer !== this.myColor) {
+            console.log('Click blocked: not my turn in online mode');
+            return;
+        }
 
         const square = e.target.closest('.square');
         if (!square) return;
@@ -1800,34 +1817,43 @@ class ChessGame {
     }
 
     checkGameEnd() {
-        if (this.isCheckmate(this.currentPlayer)) {
-            const winner = this.currentPlayer === 'white' ? 'black' : 'white';
-            const winnerName = winner === 'white' ? 'Beyaz' : 'Siyah';
-            let message = `Şah Mat! ${winnerName} kazandı.`;
+        // UI donmasını önlemek için async kontrol
+        setTimeout(() => {
+            console.log('Checking game end for:', this.currentPlayer);
 
-            if (this.gameMode === 'online') {
-                if (winner === this.myColor) {
-                    message = 'Tebrikler! Kazandınız! 🏆';
-                    this.triggerFireworks(); // Winner gets fireworks
+            try {
+                if (this.isCheckmate(this.currentPlayer)) {
+                    const winner = this.currentPlayer === 'white' ? 'black' : 'white';
+                    const winnerName = winner === 'white' ? 'Beyaz' : 'Siyah';
+                    let message = `Şah Mat! ${winnerName} kazandı.`;
+
+                    if (this.gameMode === 'online') {
+                        if (winner === this.myColor) {
+                            message = 'Tebrikler! Kazandınız! 🏆';
+                            this.triggerFireworks(); // Winner gets fireworks
+                        } else {
+                            message = 'Kaybettiniz. İyi oyundu.';
+                        }
+                    } else {
+                        this.triggerFireworks(); // both see fireworks in local mode
+                    }
+
+                    this.endGame(message);
+                } else if (this.isDraw() || this.halfMoveClock >= 100) {
+                    this.endGame(this.halfMoveClock >= 100 ? 'Oyun Berabere! (50 Hamle Kuralı)' : 'Oyun Berabere!');
+                } else if (this.isKingInCheck(this.currentPlayer)) {
+                    const statusEl = document.getElementById('game-status');
+                    statusEl.textContent = `${this.currentPlayer === 'white' ? 'Beyaz' : 'Siyah'} Şah Tehdidi Altında!`;
+                    statusEl.className = 'game-status check';
                 } else {
-                    message = 'Kaybettiniz. İyi oyundu.';
+                    const statusEl = document.getElementById('game-status');
+                    statusEl.textContent = '';
+                    statusEl.className = 'game-status';
                 }
-            } else {
-                this.triggerFireworks(); // both see fireworks in local mode
+            } catch (error) {
+                console.error('checkGameEnd error:', error);
             }
-
-            this.endGame(message);
-        } else if (this.isDraw() || this.halfMoveClock >= 100) {
-            this.endGame(this.halfMoveClock >= 100 ? 'Oyun Berabere! (50 Hamle Kuralı)' : 'Oyun Berabere!');
-        } else if (this.isKingInCheck(this.currentPlayer)) {
-            const statusEl = document.getElementById('game-status');
-            statusEl.textContent = `${this.currentPlayer === 'white' ? 'Beyaz' : 'Siyah'} Şah Tehdidi Altında!`;
-            statusEl.className = 'game-status check';
-        } else {
-            const statusEl = document.getElementById('game-status');
-            statusEl.textContent = '';
-            statusEl.className = 'game-status';
-        }
+        }, 50);
     }
 
     endGame(message) {
