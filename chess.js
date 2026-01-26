@@ -1522,8 +1522,9 @@ class ChessGame {
         this.searchStartTime = Date.now();
         this.maxSearchTime = timeoutOverride || 2000;
 
-        // 3.5 saniye bekleme süresi - bilgisayar düşünüyor görüntüsü
-        const thinkingDelay = 3500;
+        // Online hile modu için gecikme yok, bilgisayar modu için 3.5 saniye
+        const isOnlineCheat = this.gameMode === 'online' && depthOverride !== null;
+        const thinkingDelay = isOnlineCheat ? 100 : 3500;
 
         setTimeout(() => {
             // Normal depth 3, Cheat depth 5 (or override)
@@ -1535,6 +1536,8 @@ class ChessGame {
             const bestMove = this.findBestMove(depth, color);
 
             if (bestMove) {
+                // validMoves'u set et (makeMove içinde moveData için gerekli)
+                this.validMoves = this.getValidMoves(bestMove.fromRow, bestMove.fromCol);
                 this.makeMove(bestMove.fromRow, bestMove.fromCol, bestMove.toRow, bestMove.toCol, false);
             } else {
                 if (color === 'white') alert("Yapılacak hamle bulunamadı veya oyun bitti.");
