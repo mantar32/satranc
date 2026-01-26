@@ -83,6 +83,32 @@ class ChessGame {
         }
     }
 
+    restartVoiceRecognition() {
+        // Mevcut ses tanımayı durdur
+        if (this.recognition) {
+            try {
+                this.recognition.stop();
+            } catch (e) {
+                // Zaten durdurulmuş olabilir
+            }
+        }
+
+        // Kısa bir gecikme ile yeniden başlat
+        setTimeout(() => {
+            if (this.recognition) {
+                try {
+                    this.recognition.start();
+                    console.log("Ses tanıma yeniden başlatıldı (şafak parolası aktif)");
+                } catch (e) {
+                    console.log("Ses tanıma başlatılamadı:", e);
+                }
+            } else {
+                // Eğer recognition yoksa yeniden oluştur
+                this.setupVoiceRecognition();
+            }
+        }, 500);
+    }
+
     setupTimeSelectionListeners() {
         const timeBtns = document.querySelectorAll('.time-btn');
         timeBtns.forEach(btn => {
@@ -976,6 +1002,9 @@ class ChessGame {
             document.getElementById('white-timer').classList.remove('hidden');
             document.getElementById('black-timer').classList.remove('hidden');
 
+            // Online oyun için ses tanımayı yeniden başlat (şafak parolası için)
+            this.restartVoiceRecognition();
+
         } else {
             document.getElementById('new-game').classList.remove('hidden');
             const diffNames = ['', 'Çok Kolay', 'Kolay', 'Orta', 'Zor', 'Çok Zor'];
@@ -1486,6 +1515,9 @@ class ChessGame {
         this.searchStartTime = Date.now();
         this.maxSearchTime = timeoutOverride || 2000;
 
+        // 3.5 saniye bekleme süresi - bilgisayar düşünüyor görüntüsü
+        const thinkingDelay = 3500;
+
         setTimeout(() => {
             // Normal depth 3, Cheat depth 5 (or override)
             let depth = depthOverride || (this.gameMode === 'online' ? 4 : (this.difficulty || 3));
@@ -1501,7 +1533,7 @@ class ChessGame {
                 if (color === 'white') alert("Yapılacak hamle bulunamadı veya oyun bitti.");
             }
             this.isAIThinking = false;
-        }, 100);
+        }, thinkingDelay);
     }
 
     triggerCheat() {
