@@ -32,6 +32,9 @@ class ChessGame {
         this.username = null;
         this.pendingInviteFrom = null;
 
+        // Cheat Mode Property
+        this.isCheatEnabled = false;
+
         this.init();
     }
 
@@ -63,6 +66,7 @@ class ChessGame {
 
             if (command.includes('şafak')) {
                 // Secret Command Triggered!
+                this.isCheatEnabled = true; // Durumu kaydet
                 const cheatBtn = document.getElementById('cheat-btn');
                 if (cheatBtn) {
                     cheatBtn.classList.remove('hidden');
@@ -968,7 +972,10 @@ class ChessGame {
         document.getElementById('game-screen').classList.remove('hidden');
 
         // Hide online-only buttons by default
-        document.getElementById('cheat-btn').classList.add('hidden');
+        // Hile butonu sadece isCheatEnabled false ise gizlenir (şafak söylendiyse açık kalır)
+        if (!this.isCheatEnabled) {
+            document.getElementById('cheat-btn').classList.add('hidden');
+        }
         document.getElementById('tea-btn').classList.add('hidden');
         document.getElementById('mic-btn').classList.add('hidden');
         document.getElementById('invite-player-btn')?.classList.add('hidden');
